@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://your-frontend-project.vercel.app"], // Update this later
+  origin: ["http://localhost:5173", "https://jewellary-store-xlyz.vercel.app"], // Update this later
   credentials: true
 }));
 
