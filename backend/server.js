@@ -11,7 +11,7 @@ app.use(express.json());
 // CORS Configuration
 // Note: Removed trailing slash from Vercel URL (Browsers usually send origin without it)
 app.use(cors({
-  origin: ["http://localhost:5173", "https://jewellary-store-mu.vercel.app"],
+  origin: ["http://localhost:5173", "https://jewellary-store-iota.vercel.app/"],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
