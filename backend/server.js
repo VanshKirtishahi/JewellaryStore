@@ -8,12 +8,12 @@ const app = express();
 // 1. Middlewares
 app.use(cors({
   origin: [
+    'https://jewellary-store-pw48.vercel.app',
     "http://localhost:5173", 
-    "http://127.0.0.1:5173",
-    "https://jewellary-store-pw48.vercel.app/" // <--- REPLACE THIS with your actual Vercel domain
-  ], 
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  credentials: true
+    "http://127.0.0.1:5173",],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Body parsers (Increased limit for base64 if needed, though we use Cloudinary now)
