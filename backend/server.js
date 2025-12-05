@@ -10,7 +10,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173", 
     "http://127.0.0.1:5173",
-    "https://your-project-name.vercel.app" // <--- REPLACE THIS with your actual Vercel domain
+    "https://jewellary-store-pw48.vercel.app/" // <--- REPLACE THIS with your actual Vercel domain
   ], 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
