@@ -1,20 +1,23 @@
-// routes/customRequests.js
 const router = require('express').Router();
 const { CustomRequest } = require('../models/Schemas');
 const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
-// 1. SUBMIT REQUEST (User)
-router.post('/', verifyToken, async (req, res) => {
-  const newRequest = new CustomRequest(req.body);
+// SUBMIT REQUEST
+router.post('/', verifyToken, upload.single('referenceImage'), async (req, res) => {
   try {
-    const savedRequest = await newRequest.save();
+    const requestData = req.body;
+    if (req.file) requestData.referenceImage = req.file.path;
+
+    const newRequest = new CustomRequest(requestData);
+    const savedRequest = await newRequest.save(); // Saves to 'customrequests' collection
     res.status(200).json(savedRequest);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// 2. GET MY REQUESTS (User Dashboard)
+// GET USER REQUESTS
 router.get('/user/:userId', verifyToken, async (req, res) => {
   try {
     const requests = await CustomRequest.find({ userId: req.params.userId });
@@ -24,25 +27,11 @@ router.get('/user/:userId', verifyToken, async (req, res) => {
   }
 });
 
-// 3. GET ALL REQUESTS (Admin Dashboard)
+// GET ALL REQUESTS (Admin)
 router.get('/', verifyAdmin, async (req, res) => {
   try {
-    const requests = await CustomRequest.find().populate('userId', 'name email'); // Populate shows User Name instead of just ID
+    const requests = await CustomRequest.find().sort({ createdAt: -1 });
     res.status(200).json(requests);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
-
-// 4. UPDATE REQUEST (Admin - Reply with Quote/Status)
-router.put('/:id', verifyAdmin, async (req, res) => {
-  try {
-    const updatedRequest = await CustomRequest.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body }, // Admin sends { status: "Quote Sent", adminComments: "Cost will be $500" }
-      { new: true }
-    );
-    res.status(200).json(updatedRequest);
   } catch (err) {
     res.status(500).json(err);
   }

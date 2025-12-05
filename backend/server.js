@@ -5,44 +5,48 @@ const cors = require('cors');
 
 const app = express();
 
-// Middleware
-app.use(express.json());
-
-// CORS Configuration
-// Note: Removed trailing slash from Vercel URL (Browsers usually send origin without it)
+// 1. Middlewares
 app.use(cors({
-  origin: ["http://localhost:5173", "https://jewellary-stroe.netlify.app/"],
+  origin: [
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173",
+    "https://your-project-name.vercel.app" // <--- REPLACE THIS with your actual Vercel domain
+  ], 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true
 }));
 
-// Database Connection
+// Body parsers (Increased limit for base64 if needed, though we use Cloudinary now)
+app.use(express.json({ limit: '50mb' })); 
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// 2. Database Connection
+// Ensure your .env file has: MONGO_URI=mongodb+srv://<user>:<pass>@<cluster>.mongodb.net/jewellery_store_db
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
+  .then(() => console.log('✅ MongoDB Connected to jewellery_store_db'))
   .catch(err => console.log('❌ MongoDB Connection Error:', err));
 
-// Import Routes
+// 3. Import Routes
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const orderRoutes = require('./routes/orders');
 const customRoutes = require('./routes/customRequests');
+const userRoutes = require('./routes/users');
 
-// Use Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/custom', customRoutes);
+// 4. Use Routes
+app.use('/api/auth', authRoutes);         // Users (Register/Login)
+app.use('/api/users', userRoutes);        // Users (Management)
+app.use('/api/products', productRoutes);  // Products
+app.use('/api/orders', orderRoutes);      // Orders
+app.use('/api/custom', customRoutes);     // Custom Requests
 
-// Root Route (Good for testing if backend is live)
+// Root Route
 app.get('/', (req, res) => {
   res.send('Jewelry Store API is Running');
 });
 
-// CRITICAL FOR VERCEL DEPLOYMENT
-// We export the app instead of just listening
+// 5. Start Server
 module.exports = app;
-
-// Only listen to port if running locally (not on Vercel)
 if (require.main === module) {
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
