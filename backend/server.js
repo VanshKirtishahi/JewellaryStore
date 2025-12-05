@@ -10,7 +10,10 @@ app.use(cors({
   origin: [
     'https://jewellary-store-pw48.vercel.app',
     "http://localhost:5173", 
-    "http://127.0.0.1:5173",],
+    "http://127.0.0.1:5173",
+    "www.shrivenkateshwaraenterprises.in",
+    "shrivenkateshwaraenterprises.in"
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'auth-token'],
