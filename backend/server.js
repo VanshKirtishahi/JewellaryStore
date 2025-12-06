@@ -9,15 +9,16 @@ const app = express();
 app.use(cors({
   origin: [
     'https://jewellary-store-pw48.vercel.app',
-    "http://localhost:5173", 
-    "http://127.0.0.1:5173",
-    "www.shrivenkateshwaraenterprises.in",
-    "shrivenkateshwaraenterprises.in"
+    'https://www.shrivenkateshwaraenterprises.in',
+    'https://shrivenkateshwaraenterprises.in',
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'auth-token'],
 }));
+
 
 // Body parsers (Increased limit for base64 if needed, though we use Cloudinary now)
 app.use(express.json({ limit: '50mb' })); 
