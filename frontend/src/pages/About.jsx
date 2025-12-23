@@ -100,10 +100,6 @@ const About = () => {
         </div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
-            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-lg rounded-full mb-8">
-              <Sparkles className="text-white" size={18} />
-              <span className="text-white font-medium tracking-widest text-sm">SINCE 1985</span>
-            </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
               Our Story of <span className="text-jewel-gold">Elegance</span>
             </h1>
@@ -127,7 +123,7 @@ const About = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Crafting Timeless <span className="text-jewel-gold">Elegance</span> Since 1985
+                Crafting Timeless <span className="text-jewel-gold">Elegance</span>
               </h2>
               <div className="space-y-4 text-gray-600">
                 <p>
@@ -186,99 +182,6 @@ const About = () => {
           </div>
         </div>
       </div>
-
-      {/* Timeline */}
-      <div className="py-16 sm:py-20">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Our <span className="text-jewel-gold">Journey</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Three decades of excellence, innovation, and beautiful creations
-            </p>
-          </div>
-
-          <div className="relative">
-            {/* Timeline line */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gradient-to-b from-jewel-gold to-transparent hidden lg:block"></div>
-            
-            <div className="space-y-12">
-              {milestones.map((milestone, index) => (
-                <div 
-                  key={index}
-                  className={`relative flex flex-col lg:flex-row items-center ${
-                    index % 2 === 0 ? 'lg:flex-row-reverse' : ''
-                  }`}
-                >
-                  {/* Year Circle */}
-                  <div className="z-10 w-24 h-24 bg-gradient-to-r from-jewel-gold to-amber-500 rounded-full flex items-center justify-center shadow-2xl mb-6 lg:mb-0">
-                    <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-2xl font-bold text-gray-900">{milestone.year}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Content */}
-                  <div className={`lg:w-5/12 ${index % 2 === 0 ? 'lg:pr-12' : 'lg:pl-12'}`}>
-                    <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-3">{milestone.title}</h3>
-                      <p className="text-gray-600">{milestone.description}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Meet the Team */}
-      <div className="py-16 sm:py-20 bg-gradient-to-b from-jewel-cream to-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Meet Our <span className="text-jewel-gold">Master Artisans</span>
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              The talented hands and creative minds behind every masterpiece
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {team.map((member, index) => (
-              <div 
-                key={index} 
-                className="group bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-500"
-              >
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">{member.name}</h3>
-                  <p className="text-jewel-gold font-medium mb-3">{member.role}</p>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <Clock size={14} />
-                      <span>{member.experience} experience</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Award size={14} />
-                      <span>Specialty: {member.specialty}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* Certifications & Guarantees */}
       <div className="py-16 sm:py-20 bg-white">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -378,16 +281,6 @@ const About = () => {
               <p className="text-gray-300 text-sm mt-2">Free parking available</p>
             </div>
           </div>
-
-          <div className="text-center mt-12">
-            <Link
-              to="/contact"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-jewel-gold to-amber-500 text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300"
-            >
-              Schedule a Private Viewing
-              <ArrowRight size={20} />
-            </Link>
-          </div>
         </div>
       </div>
 
@@ -408,12 +301,6 @@ const About = () => {
                   className="px-8 py-4 bg-gradient-to-r from-jewel-gold to-amber-500 text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300"
                 >
                   Start Custom Design
-                </Link>
-                <Link
-                  to="/contact"
-                  className="px-8 py-4 bg-white text-gray-900 border-2 border-jewel-gold rounded-xl font-semibold hover:bg-jewel-gold hover:text-white transition-all duration-300"
-                >
-                  Book Consultation
                 </Link>
               </div>
             </div>

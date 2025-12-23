@@ -2,18 +2,42 @@ const router = require('express').Router();
 const { Order } = require('../models/Schemas');
 const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware');
 
-// CREATE ORDER
+// 1. CREATE ORDER
 router.post('/', verifyToken, async (req, res) => {
   const newOrder = new Order(req.body);
   try {
-    const savedOrder = await newOrder.save(); // Saves to 'orders' collection
+    const savedOrder = await newOrder.save();
     res.status(200).json(savedOrder);
   } catch (err) {
     res.status(500).json(err);
   }
 });
 
-// GET USER ORDERS
+// 2. UPDATE ORDER (Admin Only) - Fixes the 404 Error
+router.put('/:id', verifyAdmin, async (req, res) => {
+  try {
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.status(200).json(updatedOrder);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// 3. DELETE ORDER (Admin Only)
+router.delete('/:id', verifyAdmin, async (req, res) => {
+  try {
+    await Order.findByIdAndDelete(req.params.id);
+    res.status(200).json("Order has been deleted...");
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// 4. GET USER ORDERS
 router.get('/find/:userId', verifyToken, async (req, res) => {
   try {
     const orders = await Order.find({ userId: req.params.userId });
@@ -23,12 +47,40 @@ router.get('/find/:userId', verifyToken, async (req, res) => {
   }
 });
 
-// GET ALL ORDERS (Admin)
+// 5. GET ALL ORDERS (Admin)
 router.get('/', verifyAdmin, async (req, res) => {
   try {
     // Populate user details from 'users' collection
     const orders = await Order.find().populate('userId', 'name email');
     res.status(200).json(orders);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// 6. GET MONTHLY INCOME (Stats)
+router.get('/income', verifyAdmin, async (req, res) => {
+  const date = new Date();
+  const lastMonth = new Date(date.setMonth(date.getMonth() - 1));
+  const previousMonth = new Date(new Date().setMonth(lastMonth.getMonth() - 1));
+
+  try {
+    const income = await Order.aggregate([
+      { $match: { createdAt: { $gte: previousMonth } } },
+      {
+        $project: {
+          month: { $month: "$createdAt" },
+          sales: "$amount",
+        },
+      },
+      {
+        $group: {
+          _id: "$month",
+          total: { $sum: "$sales" },
+        },
+      },
+    ]);
+    res.status(200).json(income);
   } catch (err) {
     res.status(500).json(err);
   }

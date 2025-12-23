@@ -69,12 +69,12 @@ const MainLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white via-gray-50/30 to-white">
-      {/* Navbar */}
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* Navbar - Sticky handling is done in Navbar.jsx or via CSS, usually we rely on flow here */}
       <Navbar />
 
-      {/* Main Content */}
-      <main className="flex-grow pt-20">
+      {/* Main Content - REMOVED pt-20 to fix gap */}
+      <main className="flex-grow w-full">
         <Outlet />
       </main>
 
@@ -89,8 +89,8 @@ const MainLayout = () => {
         </button>
       )}
 
-      {/* Enhanced Footer */}
-      <footer className="bg-gradient-to-b from-gray-900 to-black text-white mt-auto">
+      {/* Footer */}
+      <footer className="bg-gradient-to-b from-gray-900 to-black text-white mt-auto w-full">
         {/* Newsletter Section */}
         <div className="border-b border-gray-800">
           <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
@@ -226,8 +226,8 @@ const MainLayout = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
                 { label: 'Certified Diamonds', icon: '💎' },
-                { label: 'Ethically Sourced', icon: '🌱' },
-                { label: 'Lifetime Warranty', icon: '🔧' },
+                { label: 'Ethically Sourced', icon: '🌍' },
+                { label: 'Lifetime Warranty', icon: '🛡️' },
                 { label: 'Secure Payment', icon: '🔒' },
               ].map((badge, index) => (
                 <div key={index} className="flex items-center gap-3">
@@ -264,88 +264,9 @@ const MainLayout = () => {
                 </a>
               </div>
             </div>
-            
-            {/* Made with Love */}
-            <div className="mt-4 text-center">
-              <div className="inline-flex items-center gap-2 text-gray-500 text-sm">
-                <span>Crafted with</span>
-                <Heart size={14} className="text-red-500 animate-heartbeat" />
-                <span>and</span>
-                <Gem size={14} className="text-jewel-gold" />
-                <span>in New York</span>
-              </div>
-            </div>
           </div>
         </div>
       </footer>
-
-      {/* Floating Live Chat Button */}
-      <button
-        className="fixed bottom-6 left-6 z-40 w-14 h-14 bg-gradient-to-br from-jewel-gold to-amber-500 text-white rounded-full flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-110 group animate-float"
-        aria-label="Live chat support"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-        <div className="absolute -top-2 -right-2 w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-      </button>
-
-      {/* Add CSS animations */}
-      <style>{`
-        @keyframes bounce-subtle {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-5px);
-          }
-        }
-        
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        @keyframes heartbeat {
-          0%, 100% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.2);
-          }
-        }
-        
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-10px) rotate(5deg);
-          }
-        }
-        
-        .animate-bounce-subtle {
-          animation: bounce-subtle 2s ease-in-out infinite;
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-        
-        .animate-heartbeat {
-          animation: heartbeat 1.5s ease-in-out infinite;
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 };

@@ -1,23 +1,18 @@
 import { useState, useContext, useEffect } from 'react';
-import axios from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
+import axios from '../api/axios';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { 
   Mail, 
   Lock, 
   Eye, 
   EyeOff, 
-  Sparkles, 
-  Gem, 
   Crown, 
-  Shield, 
-  AlertCircle, 
-  CheckCircle,
-  User,
-  Facebook,
-  Instagram,
   ArrowRight,
-  Loader2
+  Loader2,
+  AlertCircle,
+  CheckCircle,
+  Shield
 } from 'lucide-react';
 
 const Login = () => {
@@ -27,22 +22,22 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
 
-  // Pre-fill email if coming from cart/checkout
+  // Handle auto-fill from redirects (e.g. after registration)
   useEffect(() => {
     if (location.state?.email) {
       setFormData(prev => ({ ...prev, email: location.state.email }));
     }
     if (location.state?.success) {
-      setSuccessMessage(location.state.success);
-      setTimeout(() => setSuccessMessage(''), 5000);
+      setSuccess(location.state.success);
     }
   }, [location.state]);
 
@@ -54,22 +49,32 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess(''); // Clear previous success messages
     setIsLoading(true);
 
     try {
+      // FIXED: Only send email and password. 
+      // Removed 'rememberMe' from the payload as it likely caused the 400 error.
       const res = await axios.post('/auth/login', {
-        ...formData,
-        rememberMe
+        email: formData.email,
+        password: formData.password
       });
       
+      // Pass token and user data to context
       login(res.data.token, res.data.user);
       
-      // Show success message
-      setSuccessMessage('Welcome back! Redirecting...');
+      setSuccess('Login successful! Redirecting...');
       
-      // Redirect after delay
+      // Handle Remember Me logic on the client side if needed
+      if (rememberMe) {
+        localStorage.setItem('rememberUser', formData.email);
+      } else {
+        localStorage.removeItem('rememberUser');
+      }
+
+      // Redirect
       setTimeout(() => {
-        if (res.data.user.role === 'admin') {
+        if (res.data.user?.role === 'admin') {
           navigate('/admin');
         } else {
           navigate(from, { replace: true });
@@ -77,197 +82,85 @@ const Login = () => {
       }, 1000);
       
     } catch (err) {
+      console.error("Login Error:", err); // Log full error for debugging
       const errorMessage = err.response?.data?.message || 
-                          err.response?.data?.error || 
-                          'Invalid email or password';
+                           err.response?.data?.error || 
+                           'Invalid email or password';
       setError(errorMessage);
       
-      // Clear form on specific errors
-      if (err.response?.status === 401) {
-        setFormData({ email: '', password: '' });
+      if (err.response?.status === 401 || err.response?.status === 400) {
+        setFormData(prev => ({ ...prev, password: '' }));
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDemoLogin = (role) => {
-    const demoCredentials = {
-      customer: { email: 'customer@demo.com', password: 'demo123' },
-      admin: { email: 'admin@demo.com', password: 'admin123' }
-    };
-    
-    setFormData(demoCredentials[role]);
-    setError('');
-  };
-
-  const handleSocialLogin = (provider) => {
-    // For now, just show a message
-    alert(`In a real app, this would redirect to ${provider} authentication`);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 flex items-center justify-center p-4">
-      <div className="max-w-6xl w-full flex flex-col lg:flex-row gap-8 items-center">
-        
-        {/* Left Side - Brand & Info */}
-        <div className="lg:w-1/2 flex flex-col items-center lg:items-start">
-          <div className="mb-8">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-16 h-16 bg-gradient-to-br from-jewel-gold to-amber-500 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-300">
-                <Crown className="text-white" size={32} />
-              </div>
-              <div>
-                <h1 className="text-3xl font-serif font-bold text-gray-900">Venkateshwara</h1>
-                <p className="text-sm text-gray-500">Fine Jewelry Since 1985</p>
-              </div>
-            </Link>
-          </div>
+    <div className="min-h-screen bg-jewel-cream flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Login Card */}
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+          <div className="p-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
+            <p className="text-gray-500 mb-8">Please sign in to access your account.</p>
 
-          <div className="hidden lg:block max-w-lg">
-            <div className="bg-gradient-to-br from-jewel-gold/10 to-amber-500/10 rounded-2xl p-8 border border-jewel-gold/20">
-              <h2 className="text-2xl font-serif font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <Sparkles className="text-jewel-gold" size={24} />
-                Welcome Back
-              </h2>
-              
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-jewel-gold/20 to-amber-500/20 rounded-xl flex items-center justify-center shrink-0">
-                    <Shield className="text-jewel-gold" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Secure Access</h3>
-                    <p className="text-gray-600 text-sm">
-                      Your account is protected with 256-bit SSL encryption
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-jewel-gold/20 to-amber-500/20 rounded-xl flex items-center justify-center shrink-0">
-                    <Gem className="text-jewel-gold" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 mb-1">Exclusive Benefits</h3>
-                    <p className="text-gray-600 text-sm">
-                      Access member-only offers, early previews, and personalized service
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Testimonials */}
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-gray-900 to-black rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold">SM</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Sarah M.</p>
-                    <p className="text-sm text-gray-500">Gold Member</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">
-                  "The personal service and exquisite pieces keep me coming back. Truly exceptional!"
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side - Login Form */}
-        <div className="lg:w-1/2 max-w-md w-full">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
-            {/* Form Header */}
-            <div className="bg-gradient-to-r from-gray-900 to-black p-6 text-center">
-              <h2 className="text-2xl font-serif font-bold text-white mb-2">Sign In to Your Account</h2>
-              <p className="text-gray-300 text-sm">Access your orders, wishlist, and personalized recommendations</p>
-            </div>
-
-            {/* Success Message */}
-            {successMessage && (
-              <div className="mx-6 mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl animate-slideDown">
-                <div className="flex items-center gap-3">
-                  <CheckCircle className="text-green-500" size={20} />
-                  <span className="text-green-700 text-sm font-medium">{successMessage}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Error Message */}
+            {/* Alerts */}
             {error && (
-              <div className="mx-6 mt-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl animate-slideDown">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="text-red-500" size={20} />
-                  <div>
-                    <p className="text-red-700 text-sm font-medium">{error}</p>
-                    {error.includes('Invalid') && (
-                      <p className="text-red-600 text-xs mt-1">
-                        Try: customer@demo.com / demo123
-                      </p>
-                    )}
-                  </div>
-                </div>
+              <div className="mb-6 p-4 bg-red-50 border border-red-100 text-red-600 rounded-xl flex items-start gap-3 text-sm animate-fade-in">
+                <AlertCircle className="shrink-0 mt-0.5" size={18} />
+                <span>{error}</span>
+              </div>
+            )}
+            
+            {success && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-xl flex items-start gap-3 text-sm animate-fade-in">
+                <CheckCircle className="shrink-0 mt-0.5" size={18} />
+                <span>{success}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* Email Field */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <span className="flex items-center gap-2">
-                    <Mail size={16} />
-                    Email Address
-                  </span>
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-gray-700 ml-1">Email Address</label>
+                <div className="relative group">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-jewel-gold transition-colors" size={20} />
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    placeholder="your@email.com"
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-jewel-gold focus:border-transparent outline-none transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-jewel-gold/20 focus:border-jewel-gold outline-none transition-all duration-200 font-medium text-gray-900"
+                    placeholder="name@example.com"
                     required
-                    disabled={isLoading}
                   />
                 </div>
               </div>
 
               {/* Password Field */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    <span className="flex items-center gap-2">
-                      <Lock size={16} />
-                      Password
-                    </span>
-                  </label>
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm text-jewel-gold hover:text-amber-600 transition-colors duration-300"
-                  >
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between ml-1">
+                  <label className="text-sm font-semibold text-gray-700">Password</label>
+                  <Link to="/forgot-password" className="text-sm text-jewel-gold hover:text-amber-600 font-medium transition-colors">
                     Forgot password?
                   </Link>
                 </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-jewel-gold transition-colors" size={20} />
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="Enter your password"
-                    className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-jewel-gold focus:border-transparent outline-none transition-all duration-300"
+                    className="w-full pl-12 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-jewel-gold/20 focus:border-jewel-gold outline-none transition-all duration-200 font-medium text-gray-900"
+                    placeholder="••••••••"
                     required
-                    disabled={isLoading}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -275,148 +168,64 @@ const Login = () => {
               </div>
 
               {/* Remember Me */}
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 text-jewel-gold rounded focus:ring-jewel-gold"
-                    disabled={isLoading}
-                  />
-                  <span className="text-sm text-gray-700">Remember me</span>
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 text-jewel-gold border-gray-300 rounded focus:ring-jewel-gold cursor-pointer"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 cursor-pointer">
+                  Remember me
                 </label>
-                <div className="text-sm text-gray-500">
-                  <Shield size={14} className="inline mr-1" />
-                  Secure connection
-                </div>
               </div>
 
-              {/* Login Button */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-jewel-gold to-amber-500 text-white py-4 rounded-xl font-bold hover:from-amber-500 hover:to-jewel-gold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+                className="w-full py-3.5 bg-gradient-to-r from-jewel-gold to-amber-500 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl hover:translate-y-[-1px] active:translate-y-[1px] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="animate-spin" size={20} />
-                    Signing In...
+                    <span>Signing In...</span>
                   </>
                 ) : (
                   <>
-                    Sign In
-                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                    <span>Sign In</span>
+                    <ArrowRight size={20} />
                   </>
                 )}
               </button>
-
-              {/* Demo Accounts */}
-              <div className="pt-4 border-t border-gray-200">
-                <p className="text-sm text-gray-500 text-center mb-3">Try demo accounts:</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('customer')}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border border-blue-200 rounded-lg hover:from-blue-100 hover:to-cyan-100 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
-                  >
-                    <User size={14} />
-                    Customer Demo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDemoLogin('admin')}
-                    disabled={isLoading}
-                    className="px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200 rounded-lg hover:from-purple-100 hover:to-pink-100 transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 text-sm"
-                  >
-                    <Crown size={14} />
-                    Admin Demo
-                  </button>
-                </div>
-              </div>
-
-              {/* Social Login (Placeholder) */}
-              <div className="pt-4 border-t border-gray-200">
-                <p className="text-sm text-gray-500 text-center mb-3">Or continue with</p>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('google')}
-                    disabled={isLoading}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    Google
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('facebook')}
-                    disabled={isLoading}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors duration-300 disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    <Facebook size={20} className="text-blue-600" />
-                    Facebook
-                  </button>
-                </div>
-              </div>
             </form>
-
-            {/* Sign Up Link */}
-            <div className="p-6 border-t border-gray-200 text-center">
-              <p className="text-gray-600">
-                Don't have an account?{' '}
-                <Link
-                  to="/register"
-                  className="text-jewel-gold hover:text-amber-600 font-bold transition-colors duration-300"
-                >
-                  Create an account
-                </Link>
-              </p>
-              <p className="text-xs text-gray-500 mt-3">
-                By signing in, you agree to our{' '}
-                <Link to="/terms" className="underline hover:text-gray-700">Terms</Link> and{' '}
-                <Link to="/privacy" className="underline hover:text-gray-700">Privacy Policy</Link>
-              </p>
-            </div>
           </div>
-
-          {/* Mobile Features */}
-          <div className="lg:hidden mt-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gradient-to-br from-jewel-gold/10 to-amber-500/10 rounded-xl p-4 text-center">
-                <Shield className="w-8 h-8 text-jewel-gold mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">Secure</p>
-              </div>
-              <div className="bg-gradient-to-br from-jewel-gold/10 to-amber-500/10 rounded-xl p-4 text-center">
-                <Gem className="w-8 h-8 text-jewel-gold mx-auto mb-2" />
-                <p className="text-sm font-medium text-gray-900">Exclusive</p>
-              </div>
+          
+          {/* Footer Area */}
+          <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/register" className="font-bold text-jewel-gold hover:text-amber-600 transition-colors">
+                Create Account
+              </Link>
+            </p>
+            <div className="mt-4 flex items-center justify-center gap-2 text-xs text-gray-400">
+              <Shield size={12} />
+              <span>Secure 256-bit SSL Encrypted</span>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Add CSS animations */}
+      
+      {/* Simple styling for fade-in animation */}
       <style>{`
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-5px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        
-        .animate-slideDown {
-          animation: slideDown 0.3s ease-out;
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out forwards;
         }
       `}</style>
     </div>

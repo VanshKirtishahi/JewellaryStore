@@ -3,7 +3,6 @@ import { CartContext } from '../context/CartContext';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/axios';
-// FIX: Consolidated imports to avoid duplicates
 import { Trash2, CreditCard, ArrowRight, ShoppingBag } from 'lucide-react';
 
 const Cart = () => {
@@ -12,6 +11,15 @@ const Cart = () => {
   const navigate = useNavigate();
 
   const total = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+
+  // Helper to format currency
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   const handleCheckout = async () => {
     if (!user) {
@@ -29,14 +37,14 @@ const Cart = () => {
           priceAtPurchase: item.price
         })),
         totalAmount: total,
-        shippingAddress: "123 Default St, Mumbai",
+        shippingAddress: user.address || "Address Pending", // Use user address if available
         status: "Pending"
       };
 
       await axios.post('/orders', orderData);
       alert("Order Placed Successfully!");
       clearCart();
-      navigate('/dashboard'); 
+      navigate('/user/orders'); // Redirect to My Orders page
     } catch (err) {
       console.error(err);
       alert("Checkout Failed. Please try again.");
@@ -51,7 +59,7 @@ const Cart = () => {
         </div>
         <h2 className="text-3xl font-serif font-bold text-gray-800 mb-4">Your Cart is Empty</h2>
         <p className="text-gray-500 mb-8 max-w-md">Looks like you haven't discovered our treasures yet. Browse our collection to find something timeless.</p>
-        <button onClick={() => navigate('/')} className="bg-black text-white px-8 py-3 rounded-full hover:bg-gray-800 transition font-medium">
+        <button onClick={() => navigate('/collections')} className="bg-black text-white px-8 py-3 rounded-full hover:bg-gray-800 transition font-medium">
           Start Shopping
         </button>
       </div>
@@ -75,7 +83,9 @@ const Cart = () => {
                 <div>
                   <h3 className="font-bold text-lg text-gray-900 mb-1">{item.title}</h3>
                   <p className="text-gray-500 text-sm mb-2 uppercase tracking-wider">{item.category}</p>
-                  <p className="font-serif text-jewel-gold font-bold text-lg">${item.price.toLocaleString()}</p>
+                  <p className="font-serif text-jewel-gold font-bold text-lg">
+                    {formatCurrency(item.price)}
+                  </p>
                 </div>
                 
                 <div className="flex flex-col items-end justify-between">
@@ -101,7 +111,7 @@ const Cart = () => {
           <div className="space-y-4 mb-8">
             <div className="flex justify-between text-gray-600">
               <span>Subtotal</span>
-              <span>${total.toLocaleString()}</span>
+              <span>{formatCurrency(total)}</span>
             </div>
             <div className="flex justify-between text-gray-600">
               <span>Shipping</span>
@@ -109,7 +119,7 @@ const Cart = () => {
             </div>
             <div className="border-t border-gray-100 pt-4 flex justify-between font-bold text-xl text-gray-900">
               <span>Total</span>
-              <span>${total.toLocaleString()}</span>
+              <span>{formatCurrency(total)}</span>
             </div>
           </div>
           <button 

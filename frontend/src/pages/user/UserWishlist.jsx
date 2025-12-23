@@ -1,29 +1,42 @@
-import { useState, useEffect } from 'react';
-import { Heart, ShoppingBag, Trash2, Star, ArrowRight, Gem } from 'lucide-react';
+import { useState, useEffect, useContext } from 'react';
+import { Heart, ShoppingBag, Trash2, Star, ArrowRight, Gem, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import axios from '../../api/axios'; // Ensure you have this configured
+import axios from '../../api/axios';
+import { AuthContext } from '../../context/AuthContext';
+import { CartContext } from '../../context/CartContext'; // Assuming you have a CartContext
 
 const UserWishlist = () => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  // Optional: Context for adding to cart directly
+  // const { addToCart } = useContext(CartContext); 
+  
   const [wishlistItems, setWishlistItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch Wishlist (Simulated or Real)
+  // --- FETCH WISHLIST ---
   useEffect(() => {
     const fetchWishlist = async () => {
       try {
-        // NOTE: If you haven't created a backend /wishlist endpoint yet,
-        // this will fail. For now, I'll check localStorage or return empty.
-        const storedWishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-        
-        if (storedWishlist.length > 0) {
-           // If storing IDs, you might need to fetch product details here
-           // For now, we assume storedWishlist has full product objects
-           setWishlistItems(storedWishlist);
+        setLoading(true);
+        // 1. Try fetching from API first (if backend supports it)
+        if (user) {
+          try {
+            // Adjust endpoint as per your backend
+            // const res = await axios.get(`/users/${user._id}/wishlist`);
+            // setWishlistItems(res.data);
+            
+            // For now, simulating API fetch with localStorage fallback
+            throw new Error("API not implemented yet"); 
+          } catch (apiErr) {
+            // 2. Fallback to LocalStorage
+            const storedWishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+            setWishlistItems(storedWishlist);
+          }
         } else {
-           // Optional: Try fetching from API if you implement it later
-           // const res = await axios.get('/wishlist');
-           // setWishlistItems(res.data);
+          // Guest user: use localStorage
+          const storedWishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+          setWishlistItems(storedWishlist);
         }
       } catch (err) {
         console.error("Error fetching wishlist", err);
@@ -32,12 +45,20 @@ const UserWishlist = () => {
       }
     };
     fetchWishlist();
-  }, []);
+  }, [user]);
 
+  // --- ACTIONS ---
   const removeFromWishlist = (id) => {
     const updatedList = wishlistItems.filter(item => item._id !== id);
     setWishlistItems(updatedList);
     localStorage.setItem('wishlist', JSON.stringify(updatedList));
+    // Optional: Call API to remove
+  };
+
+  const handleMoveToCart = (product) => {
+    // addToCart(product); // Add to cart context
+    // removeFromWishlist(product._id); // Optional: Remove from wishlist after adding
+    alert("Added to cart! (Implement CartContext logic here)");
   };
 
   const formatCurrency = (amount) => {
@@ -50,18 +71,19 @@ const UserWishlist = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="w-12 h-12 border-4 border-jewel-gold border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="w-8 h-8 text-jewel-gold animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-fadeIn">
+    <div className="space-y-8 animate-fadeIn max-w-7xl mx-auto">
+      
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-100 pb-6">
         <div>
-          <h1 className="text-2xl font-serif font-bold text-gray-900 flex items-center gap-3">
+          <h1 className="text-2xl font-serif font-bold text-gray-900 flex items-center gap-2">
             My Wishlist
             <Heart className="w-6 h-6 text-red-500 fill-red-500" />
           </h1>
@@ -71,7 +93,7 @@ const UserWishlist = () => {
         </div>
         <button 
           onClick={() => navigate('/collections')}
-          className="text-sm font-medium text-jewel-gold hover:text-amber-600 flex items-center gap-1 transition-colors"
+          className="text-sm font-medium text-jewel-gold hover:text-amber-700 flex items-center gap-1 transition-colors px-4 py-2 rounded-lg hover:bg-amber-50"
         >
           Browse Collections <ArrowRight size={16} />
         </button>
@@ -79,68 +101,97 @@ const UserWishlist = () => {
 
       {/* Content */}
       {wishlistItems.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Heart size={32} className="text-red-400" />
+        <div className="bg-white rounded-2xl border border-gray-200 border-dashed p-16 text-center shadow-sm">
+          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+            <Heart size={40} className="text-red-400" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900">Your wishlist is empty</h3>
-          <p className="text-gray-500 mt-2 mb-8 max-w-md mx-auto">
-            Save your favorite pieces here to keep track of them or share with friends.
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Your wishlist is empty</h3>
+          <p className="text-gray-500 mb-8 max-w-md mx-auto">
+            Explore our exquisite collection and save your favorite pieces here.
           </p>
           <button 
             onClick={() => navigate('/collections')}
-            className="px-8 py-3 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl"
+            className="px-8 py-3 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl hover:shadow-lg transition-all transform hover:scale-105"
           >
             Start Shopping
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {wishlistItems.map((product) => (
-            <div key={product._id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden group hover:shadow-xl transition-all duration-300">
+            <div key={product._id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden group hover:shadow-xl transition-all duration-300 flex flex-col">
+              
+              {/* Image Area */}
               <div className="relative aspect-square overflow-hidden bg-gray-100">
                 <img 
-                  src={product.images?.[0] || 'https://via.placeholder.com/400?text=Jewelry'} 
+                  src={product.images?.[0] || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400&h=400&fit=crop'} 
                   alt={product.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
+                
+                {/* Remove Button */}
                 <button 
-                  onClick={() => removeFromWishlist(product._id)}
-                  className="absolute top-3 right-3 p-2 bg-white/80 backdrop-blur-sm rounded-full text-gray-400 hover:text-red-500 hover:bg-white transition-all opacity-0 group-hover:opacity-100"
-                  title="Remove"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFromWishlist(product._id);
+                  }}
+                  className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full text-gray-400 hover:text-red-500 hover:bg-white shadow-sm transition-all opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0"
+                  title="Remove from wishlist"
                 >
                   <Trash2 size={18} />
                 </button>
+
+                {/* Stock Badge */}
                 {product.stock < 5 && product.stock > 0 && (
-                  <span className="absolute bottom-3 left-3 px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded-full">
+                  <span className="absolute bottom-3 left-3 px-3 py-1 bg-amber-500/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wide rounded-full shadow-sm">
                     Low Stock
+                  </span>
+                )}
+                 {product.stock === 0 && (
+                  <span className="absolute bottom-3 left-3 px-3 py-1 bg-gray-800/90 backdrop-blur-sm text-white text-[10px] font-bold uppercase tracking-wide rounded-full shadow-sm">
+                    Out of Stock
                   </span>
                 )}
               </div>
               
-              <div className="p-5">
+              {/* Details Area */}
+              <div className="p-5 flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-2">
-                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">{product.category}</p>
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 px-2 py-0.5 rounded-md">
+                    {product.category}
+                  </span>
                   <div className="flex items-center gap-1 text-amber-500">
                     <Star size={12} className="fill-current" />
                     <span className="text-xs font-bold">4.9</span>
                   </div>
                 </div>
                 
-                <h3 className="font-bold text-gray-900 mb-2 line-clamp-1">{product.title}</h3>
-                <p className="text-lg font-serif font-bold text-jewel-gold mb-4">
-                  {formatCurrency(product.price)}
-                </p>
+                <h3 
+                  className="font-bold text-gray-900 mb-2 line-clamp-1 hover:text-jewel-gold transition-colors cursor-pointer"
+                  onClick={() => navigate(`/product/${product._id}`)}
+                >
+                  {product.title}
+                </h3>
                 
-                <div className="flex gap-3">
+                <div className="flex items-baseline gap-2 mb-4">
+                  <p className="text-lg font-serif font-bold text-gray-900">
+                    {formatCurrency(product.price)}
+                  </p>
+                  {product.originalPrice && (
+                    <p className="text-sm text-gray-400 line-through">
+                      {formatCurrency(product.originalPrice)}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="mt-auto flex gap-3">
                   <button 
-                    onClick={() => navigate(`/product/${product._id}`)}
-                    className="flex-1 py-2.5 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                    onClick={() => handleMoveToCart(product)}
+                    className="flex-1 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 text-sm font-medium shadow-sm hover:shadow-md"
+                    disabled={product.stock === 0}
                   >
-                    View Details
-                  </button>
-                  <button className="p-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center">
-                    <ShoppingBag size={20} />
+                    <ShoppingBag size={16} />
+                    {product.stock === 0 ? 'Unavailable' : 'Add to Cart'}
                   </button>
                 </div>
               </div>

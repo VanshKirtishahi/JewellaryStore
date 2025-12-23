@@ -3,35 +3,35 @@ import React, { createContext, useState, useEffect } from 'react';
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
-
-  // Load cart from local storage on startup
-  useEffect(() => {
-    const storedCart = localStorage.getItem('cartItems');
-    if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
+  // FIX: Load from localStorage directly in useState to prevent wiping data
+  const [cartItems, setCartItems] = useState(() => {
+    try {
+      const storedCart = localStorage.getItem('cartItems');
+      return storedCart ? JSON.parse(storedCart) : [];
+    } catch (error) {
+      console.error("Failed to load cart", error);
+      return [];
     }
-  }, []);
+  });
 
-  // Save cart to local storage whenever it changes
+  // Save to localStorage whenever cartItems changes
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = (product) => {
+  const addToCart = (product, quantity = 1) => {
     const existItem = cartItems.find((x) => x._id === product._id);
+    
     if (existItem) {
-      // If item exists, just increase quantity
       setCartItems(
         cartItems.map((x) =>
-          x._id === product._id ? { ...existItem, qty: existItem.qty + 1 } : x
+          x._id === product._id ? { ...existItem, qty: existItem.qty + quantity } : x
         )
       );
     } else {
-      // Add new item with qty 1
-      setCartItems([...cartItems, { ...product, qty: 1 }]);
+      setCartItems([...cartItems, { ...product, qty: quantity }]);
     }
-    alert(`${product.title} added to cart!`);
+    // Optional: alert(`${product.title} added to cart!`);
   };
 
   const removeFromCart = (id) => {

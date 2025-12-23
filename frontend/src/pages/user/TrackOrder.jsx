@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
+import { useParams } from 'react-router-dom'; // Import useParams
 import axios from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
 import { 
@@ -8,11 +9,11 @@ import {
   CheckCircle, 
   Clock, 
   MapPin, 
-  ChevronRight,
   AlertCircle
 } from 'lucide-react';
 
 const TrackOrder = () => {
+  const { id } = useParams(); // Get ID from URL
   const { user } = useContext(AuthContext);
   const [activeOrders, setActiveOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,11 +23,23 @@ const TrackOrder = () => {
   useEffect(() => {
     const fetchActiveOrders = async () => {
       try {
-        const res = await axios.get(`/orders/find/${user.id}`);
-        // Filter for active orders only (not delivered/cancelled)
-        const active = res.data.filter(o => ['Pending', 'Processing', 'Shipped'].includes(o.status));
+        if (!user) return;
+        setLoading(true);
+        const userId = user._id || user.id; // Safe ID check
+        const res = await axios.get(`/orders/find/${userId}`);
+        
+        // Filter for active orders (add 'Delivered' if you want to track history too)
+        const active = res.data.filter(o => ['Pending', 'Processing', 'Shipped', 'Delivered'].includes(o.status));
         setActiveOrders(active);
-        if (active.length > 0) setSelectedOrder(active[0]);
+
+        // Auto-select based on URL ID or default to first
+        if (id) {
+          const linkedOrder = active.find(o => o._id === id);
+          if (linkedOrder) setSelectedOrder(linkedOrder);
+          else if (active.length > 0) setSelectedOrder(active[0]);
+        } else if (active.length > 0) {
+          setSelectedOrder(active[0]);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -34,16 +47,14 @@ const TrackOrder = () => {
       }
     };
     fetchActiveOrders();
-  }, [user]);
+  }, [user, id]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchId) return;
-    // In a real app, you might fetch a specific order by ID here
-    // For now, we filter the local list
     const found = activeOrders.find(o => o._id.includes(searchId));
     if (found) setSelectedOrder(found);
-    else alert('Order not found in your active shipments');
+    else alert('Order not found in your list');
   };
 
   const steps = [
@@ -72,7 +83,7 @@ const TrackOrder = () => {
   if (loading) return <div className="p-8 text-center">Loading tracking details...</div>;
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-serif font-bold text-gray-900 flex items-center gap-3">
@@ -97,11 +108,11 @@ const TrackOrder = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Order List */}
         <div className="lg:col-span-1 space-y-4">
-          <h3 className="font-bold text-gray-900 mb-4">Active Shipments ({activeOrders.length})</h3>
+          <h3 className="font-bold text-gray-900 mb-4">Your Orders ({activeOrders.length})</h3>
           {activeOrders.length === 0 ? (
             <div className="p-6 bg-gray-50 rounded-xl text-center text-gray-500 border border-gray-200">
               <Package className="w-10 h-10 mx-auto mb-2 opacity-30" />
-              <p>No active orders to track.</p>
+              <p>No orders to track.</p>
             </div>
           ) : (
             activeOrders.map(order => (
@@ -123,7 +134,8 @@ const TrackOrder = () => {
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">{order.items?.length || 1} items</span>
                   <span className={`font-medium ${
-                    order.status === 'Shipped' ? 'text-purple-600' : 'text-blue-600'
+                    order.status === 'Shipped' ? 'text-purple-600' : 
+                    order.status === 'Delivered' ? 'text-green-600' : 'text-blue-600'
                   }`}>
                     {order.status}
                   </span>
@@ -141,7 +153,6 @@ const TrackOrder = () => {
                 <div>
                   <p className="text-sm text-gray-500 mb-1">Estimated Delivery</p>
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {/* Mock delivery date + 5 days */}
                     {new Date(new Date(selectedOrder.createdAt).setDate(new Date(selectedOrder.createdAt).getDate() + 5)).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                   </h2>
                 </div>
@@ -189,7 +200,7 @@ const TrackOrder = () => {
                 <MapPin className="text-gray-400 mt-1" />
                 <div>
                   <h4 className="font-bold text-gray-900 text-sm">Shipping Destination</h4>
-                  <p className="text-sm text-gray-600 mt-1">{selectedOrder.shippingAddress}</p>
+                  <p className="text-sm text-gray-600 mt-1">{selectedOrder.shippingAddress || 'Address details available in order summary'}</p>
                 </div>
               </div>
             </div>

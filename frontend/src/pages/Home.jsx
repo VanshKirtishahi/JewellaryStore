@@ -141,19 +141,18 @@ const Home = () => {
       try {
         setLoading(true);
         const res = await axios.get('/products');
-        const allProducts = res.data;
-        setProducts(allProducts);
-        // Featured products are those marked as featured or high price
-        setFeaturedProducts(allProducts.filter(p => p.featured || p.price > 1000).slice(0, 4));
+        setProducts(res.data);
       } catch (err) {
         console.error("Error fetching products:", err);
+        // Fallback to empty array so the page still renders
+        setProducts([]); 
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, []);
-
+  
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -216,10 +215,6 @@ const Home = () => {
             <div className="absolute inset-0 z-20 flex items-center">
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="max-w-2xl">
-                  <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-lg rounded-full mb-8">
-                    <Sparkles className="text-white" size={18} />
-                    <span className="text-white font-medium tracking-widest text-sm">SINCE 1985</span>
-                  </div>
                   <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
                     {slide.title}
                   </h1>
@@ -334,135 +329,6 @@ const Home = () => {
         </form>
       </div>
 
-      {/* Benefits Bar */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {benefits.map((benefit, index) => (
-            <div 
-              key={index} 
-              className={`${benefit.bgColor} rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-jewel-gold/10`}
-            >
-              <div className={`w-12 h-12 rounded-xl ${benefit.bgColor} flex items-center justify-center mb-4`}>
-                <span className={benefit.color}>{benefit.icon}</span>
-              </div>
-              <h3 className="font-bold text-gray-900 mb-2">{benefit.title}</h3>
-              <p className="text-gray-600 text-sm">{benefit.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Stats Section */}
-      <div className="bg-gradient-to-r from-jewel-gold/5 via-amber-500/5 to-yellow-500/5 py-12 sm:py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-jewel-gold to-amber-500 rounded-xl mb-4">
-                  <span className="text-white">{stat.icon}</span>
-                </div>
-                <div className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                <div className="text-sm sm:text-base text-gray-600">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Featured Products */}
-      <div className="py-12 sm:py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-8 sm:mb-12">
-            <div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
-                Featured Masterpieces
-              </h2>
-              <p className="text-gray-600">Hand-selected by our master jewelers</p>
-            </div>
-            <Link
-              to="/collections"
-              className="text-jewel-gold hover:text-amber-600 font-semibold flex items-center gap-2 group"
-            >
-              View All Collections
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse rounded-2xl h-64 sm:h-80"></div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-              {featuredProducts.map((product) => (
-                <div key={product._id} className="group">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-500">
-                    {/* Product Image */}
-                    <div className="relative aspect-square overflow-hidden">
-                      <img
-                        src={product.images?.[0] || 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
-                        alt={product.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        loading="lazy"
-                      />
-                      <div className="absolute top-3 left-3 flex flex-col gap-2">
-                        {product.featured && (
-                          <span className="px-3 py-1 bg-gradient-to-r from-jewel-gold to-amber-500 text-white text-xs font-bold rounded-full">
-                            <Star size={10} className="inline mr-1" />
-                            Featured
-                          </span>
-                        )}
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="p-4 sm:p-6">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xs text-gray-500 uppercase tracking-widest">
-                          {product.category}
-                        </span>
-                        {product.discount > 0 && (
-                          <span className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full">
-                            -{product.discount}%
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-2 line-clamp-2">
-                        {product.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                        {product.description?.substring(0, 80)}...
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <span className="text-xl sm:text-2xl font-bold text-gray-900">
-                            ${product.price.toLocaleString()}
-                          </span>
-                          {product.discount > 0 && (
-                            <span className="text-sm text-red-500 line-through ml-2">
-                              ${(product.price / (1 - product.discount/100)).toLocaleString()}
-                            </span>
-                          )}
-                        </div>
-                        <Link
-                          to={`/product/${product._id}`}
-                          className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 text-gray-700 rounded-full flex items-center justify-center hover:bg-gradient-to-r hover:from-jewel-gold hover:to-amber-500 hover:text-white transition-all duration-300 group"
-                        >
-                          <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
       {/* Main Collection */}
       <div id="collection" className="py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -575,12 +441,12 @@ const Home = () => {
                         <div className="flex items-center justify-between">
                           <div>
                             <span className="text-xl sm:text-2xl font-bold text-gray-900">
-                              ${product.price.toLocaleString()}
+                              ₹{product.price.toLocaleString('en-IN')}
                             </span>
                             {product.discount > 0 && (
                               <div className="flex items-center gap-2">
                                 <span className="text-sm text-red-500 line-through">
-                                  ${(product.price / (1 - product.discount/100)).toLocaleString()}
+                                  ₹{(product.price / (1 - product.discount/100)).toLocaleString('en-IN')}
                                 </span>
                               </div>
                             )}
@@ -600,43 +466,6 @@ const Home = () => {
               ))}
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Testimonials */}
-      <div className="bg-gradient-to-br from-jewel-cream via-white to-jewel-cream py-12 sm:py-16">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Stories of Elegance
-            </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover what our clients say about their experience with Venkateshwara Fine Jewelry
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <div className="flex items-center gap-2 mb-4">
-                  {renderStars(testimonial.rating)}
-                </div>
-                <p className="text-gray-700 italic mb-6">"{testimonial.text}"</p>
-                <div className="flex items-center gap-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-jewel-gold/20"
-                    loading="lazy"
-                  />
-                  <div>
-                    <h4 className="font-bold text-gray-900">{testimonial.name}</h4>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
 

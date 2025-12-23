@@ -1,15 +1,15 @@
 import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  ShoppingCart, 
-  User, 
-  LogOut, 
-  Crown, 
-  Sparkles, 
-  Search, 
-  Menu, 
-  X, 
-  Gem, 
+import {
+  ShoppingCart,
+  User,
+  LogOut,
+  Crown,
+  Sparkles,
+  Search,
+  Menu,
+  X,
+  Gem,
   Star,
   Heart,
   Bell,
@@ -25,7 +25,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const navbarRef = useRef(null);
   const searchRef = useRef(null);
-  
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartPulsing, setIsCartPulsing] = useState(false);
@@ -44,7 +44,7 @@ const Navbar = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Show solid navbar when scrolled down more than 50px OR if on home page
       if (currentScrollY > 50 || isHomePage) {
         setIsScrolled(true);
@@ -82,15 +82,6 @@ const Navbar = () => {
     navigate('/');
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setShowSearchBar(false);
-      setSearchQuery('');
-    }
-  };
-
   const isActive = (path) => location.pathname === path;
 
   const navLinks = [
@@ -110,47 +101,47 @@ const Navbar = () => {
   const shouldShowDarkNav = isHomePage || isScrolled;
 
   return (
-    <nav 
+    <nav
       ref={navbarRef}
       className={`
         fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out
-        ${shouldShowDarkNav 
-          ? 'bg-white shadow-lg py-2 border-b border-gray-100' 
+        ${shouldShowDarkNav
+          ? 'bg-white shadow-lg py-2 border-b border-gray-100'
           : 'bg-white/95 backdrop-blur-md shadow-sm py-3'
         }
       `}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center">
-          
+
           {/* Logo with enhanced animation */}
           <Link to="/" className="flex items-center gap-3 group relative">
-            <div className={`
-              w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-500
-              ${shouldShowDarkNav 
-                ? 'bg-gradient-to-br from-jewel-gold via-amber-500 to-yellow-400 text-white shadow-lg' 
-                : 'bg-gradient-to-br from-jewel-gold to-amber-500 text-white shadow-lg'
-              }
-              group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-2xl
-              relative overflow-hidden
-            `}>
-              <Crown size={24} className="relative z-10" />
+            {/* Increased size from w-10 h-10 to w-16 h-16 */}
+            <div className="w-16 h-16 bg-gradient-to-br to-amber-500 rounded-lg flex items-center justify-center text-white font-bold text-lg relative overflow-hidden">
+              {/* Replaced Crown with Logo Image */}
+              <img
+                src="src/assets/VK-Logo.png"
+                alt="Logo"
+                /* Added w-full h-full to make sure it fills the larger container */
+                className="w-full h-full object-contain"
+              />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
             </div>
+
             <div className="transition-all duration-500">
               <h1 className={`
-                text-2xl font-serif font-bold tracking-tight
-                ${shouldShowDarkNav ? 'text-gray-900' : 'text-gray-900'}
-                group-hover:text-jewel-gold transition-colors duration-300
-              `}>
+      text-2xl font-serif font-bold tracking-tight
+      ${shouldShowDarkNav ? 'text-gray-900' : 'text-gray-900'}
+      group-hover:text-jewel-gold transition-colors duration-300
+    `}>
                 Venkateshwara
               </h1>
               <p className={`
-                text-xs uppercase tracking-[0.3em] -mt-1
-                ${shouldShowDarkNav ? 'text-gray-600' : 'text-gray-500'}
-                transition-colors duration-300
-              `}>
-                Fine Jewelry
+      text-xs uppercase tracking-[0.3em] -mt-1
+      ${shouldShowDarkNav ? 'text-gray-600' : 'text-gray-500'}
+      transition-colors duration-300
+    `}>
+                Enterprises
               </p>
             </div>
           </Link>
@@ -158,13 +149,13 @@ const Navbar = () => {
           {/* Desktop Navigation with enhanced effects */}
           <div className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
-              <Link 
+              <Link
                 key={link.path}
                 to={link.path}
                 className={`
                   flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-300
-                  ${isActive(link.path) 
-                    ? 'text-jewel-gold bg-gradient-to-r from-jewel-gold/10 to-transparent' 
+                  ${isActive(link.path)
+                    ? 'text-jewel-gold bg-gradient-to-r from-jewel-gold/10 to-transparent'
                     : 'text-gray-700 hover:text-jewel-gold hover:bg-gray-50'
                   }
                   relative group
@@ -174,18 +165,18 @@ const Navbar = () => {
                   {link.icon}
                 </span>
                 <span className="font-medium">{link.label}</span>
-                
+
                 {isActive(link.path) && (
                   <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-jewel-gold to-transparent rounded-full" />
                 )}
-                
+
                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-jewel-gold/0 via-jewel-gold/5 to-jewel-gold/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               </Link>
             ))}
-            
+
             {user?.role === 'admin' && (
-              <Link 
-                to="/admin" 
+              <Link
+                to="/admin"
                 className="ml-2 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-900 to-black text-white rounded-full text-sm font-medium hover:from-jewel-gold hover:to-amber-500 transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
                 <Sparkles size={14} /> Admin
@@ -195,45 +186,11 @@ const Navbar = () => {
 
           {/* Right Icons with enhanced interactions */}
           <div className="flex items-center gap-3 sm:gap-5">
-            {/* Enhanced Search Bar */}
-            <div ref={searchRef} className="relative">
-              {showSearchBar ? (
-                <form 
-                  onSubmit={handleSearch}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 bg-white rounded-full shadow-xl border border-gray-200 overflow-hidden animate-slideIn"
-                >
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search diamonds, rings..."
-                    className="w-64 sm:w-80 px-4 py-2 text-gray-700 outline-none"
-                    autoFocus
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-jewel-gold hover:text-amber-600"
-                  >
-                    <Search size={20} />
-                  </button>
-                </form>
-              ) : (
-                <button 
-                  onClick={() => setShowSearchBar(true)}
-                  className={`
-                    p-2 rounded-full transition-all duration-300 hover:scale-110
-                    text-gray-600 hover:text-jewel-gold hover:bg-gray-100
-                  `}
-                >
-                  <Search size={20} />
-                </button>
-              )}
-            </div>
 
             {/* Notifications */}
             {user && (
               <div className="relative">
-                <button 
+                <button
                   onClick={() => setShowNotifications(!showNotifications)}
                   className={`
                     p-2 rounded-full transition-all duration-300 hover:scale-110 relative
@@ -247,7 +204,7 @@ const Navbar = () => {
                     </span>
                   )}
                 </button>
-                
+
                 {showNotifications && (
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-fadeIn">
                     <div className="p-4 border-b border-gray-100">
@@ -255,7 +212,7 @@ const Navbar = () => {
                     </div>
                     <div className="max-h-96 overflow-y-auto">
                       {notifications.map((notification) => (
-                        <div 
+                        <div
                           key={notification.id}
                           className="p-4 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors duration-200"
                         >
@@ -276,13 +233,13 @@ const Navbar = () => {
                 hover:bg-gray-100
                 ${isCartPulsing ? 'animate-bounce' : ''}
               `}>
-                <ShoppingCart 
-                  size={22} 
+                <ShoppingCart
+                  size={22}
                   className={`
                     transition-all duration-300
                     text-gray-600 group-hover:text-jewel-gold
                     group-hover:scale-110
-                  `} 
+                  `}
                 />
               </div>
               {cartItems.length > 0 && (
@@ -303,15 +260,15 @@ const Navbar = () => {
             {user ? (
               <div className="flex items-center gap-2 pl-3 border-l border-gray-300">
                 <div className="relative group">
-                  <Link 
-                    to="/dashboard" 
+                  <Link
+                    to="/dashboard"
                     className="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 hover:scale-110 shadow-lg relative overflow-hidden bg-gradient-to-br from-jewel-gold to-amber-500 text-white"
                   >
                     {user.name.charAt(0).toUpperCase()}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                   </Link>
                 </div>
-                <button 
+                <button
                   onClick={handleLogout}
                   className={`
                     p-2 rounded-full transition-all duration-300 hover:scale-110
@@ -323,8 +280,8 @@ const Navbar = () => {
                 </button>
               </div>
             ) : (
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className={`
                   flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 hover:scale-105
                   text-gray-700 hover:text-jewel-gold border border-gray-300 hover:border-jewel-gold
@@ -336,7 +293,7 @@ const Navbar = () => {
             )}
 
             {/* Mobile Menu Button */}
-            <button 
+            <button
               className={`
                 lg:hidden p-2 rounded-full transition-all duration-300 hover:scale-110
                 text-gray-700 hover:text-jewel-gold hover:bg-gray-100
@@ -359,13 +316,13 @@ const Navbar = () => {
           <div className="p-6">
             <div className="space-y-1">
               {navLinks.map((link) => (
-                <Link 
-                  key={link.path} 
+                <Link
+                  key={link.path}
                   to={link.path}
                   className={`
                     flex items-center gap-3 py-4 px-4 rounded-xl transition-all duration-300
-                    ${isActive(link.path) 
-                      ? 'text-jewel-gold bg-jewel-gold/10' 
+                    ${isActive(link.path)
+                      ? 'text-jewel-gold bg-jewel-gold/10'
                       : 'text-gray-700 hover:text-jewel-gold hover:bg-gray-50'
                     }
                   `}
@@ -377,10 +334,10 @@ const Navbar = () => {
                   <span className="font-medium text-lg">{link.label}</span>
                 </Link>
               ))}
-              
+
               {user?.role === 'admin' && (
-                <Link 
-                  to="/admin" 
+                <Link
+                  to="/admin"
                   className="flex items-center gap-3 py-4 px-4 rounded-xl bg-gradient-to-r from-jewel-gold to-amber-500 text-white font-medium text-lg mt-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
@@ -388,7 +345,7 @@ const Navbar = () => {
                 </Link>
               )}
             </div>
-            
+
             {user && (
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <div className="flex items-center gap-3 mb-4">

@@ -3,7 +3,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
-import AdminLayout from './pages/admin/AdminLayout';
 import UserLayout from './pages/user/UserLayout';
 
 // Public Pages
@@ -27,14 +26,6 @@ import MyOrders from './pages/user/MyOrders';
 import UserWishlist from './pages/user/UserWishlist';
 import UserSettings from './pages/user/UserSettings';
 
-// Admin Pages
-import AdminDashboard from './pages/admin/AdminDashboard';
-import ProductManagement from './pages/admin/ProductManagement';
-import OrderManagement from './pages/admin/OrderManagement';
-import CustomRequestsAdmin from './pages/admin/CustomRequestsAdmin';
-import CustomerManagement from './pages/admin/CustomerManagement';
-import Analytics from './pages/admin/Analytics';
-
 function App() {
   return (
     <BrowserRouter>
@@ -50,7 +41,6 @@ function App() {
           {/* <Route path="/gallery" element={<Gallery />} /> */}
           <Route path="/about" element={<About />} />
           {/* <Route path="/contact" element={<Contact />} /> */}
-          {/* <Route path="/track-order" element={<TrackOrder />} /> */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
@@ -65,23 +55,12 @@ function App() {
           <Route path="orders" element={<MyOrders />} />
           <Route path="requests" element={<TrackCustomRequest />} />
           <Route path="wishlist" element={<UserWishlist />} />
+          {/* FIXED: Added dynamic ID route for tracking */}
           <Route path="track-order" element={<TrackOrder />} />
+          <Route path="track-order/:id" element={<TrackOrder />} />
+          
           <Route path="settings" element={<UserSettings />} />
           <Route index element={<UserDashboard />} />
-        </Route>
-
-        {/* PROTECTED ADMIN ROUTES WITH ADMIN LAYOUT */}
-        <Route path="/admin" element={
-          <ProtectedRoute role="admin">
-            <AdminLayout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<AdminDashboard />} />
-          <Route path="products" element={<ProductManagement />} />
-          <Route path="orders" element={<OrderManagement />} />
-          <Route path="requests" element={<CustomRequestsAdmin />} />
-          <Route path="customers" element={<CustomerManagement />} />
-          <Route path="analytics" element={<Analytics />} />
         </Route>
 
         {/* Redirect old dashboard route to new user dashboard */}

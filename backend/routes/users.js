@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { User } = require('../models/Schemas');
 const { verifyAdmin } = require('../middleware/authMiddleware');
+const bcrypt = require('bcryptjs');
 
 // GET ALL USERS (Admin Only)
 // Supports /api/users?role=user
@@ -34,6 +35,16 @@ router.get('/', verifyAdmin, async (req, res) => {
   }
 });
 
+router.get('/', async (req, res) => {
+  try {
+    // Fetch all users with role 'user', excluding passwords
+    const users = await User.find({ role: 'user' }).select('-password').sort({ createdAt: -1 });
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 // GET USER STATS (Optional - for Analytics)
 router.get('/stats', verifyAdmin, async (req, res) => {
   const date = new Date();
@@ -55,6 +66,27 @@ router.get('/stats', verifyAdmin, async (req, res) => {
       },
     ]);
     res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+// UPDATE USER ROUTE (Fixes the 404 Error)
+router.put('/:id', async (req, res) => {
+  try {
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+
+    const { password, ...others } = updatedUser._doc;
+    res.status(200).json(others);
   } catch (err) {
     res.status(500).json(err);
   }
