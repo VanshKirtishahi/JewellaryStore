@@ -5,53 +5,41 @@ const cors = require('cors');
 
 const app = express();
 
-// 1. CORS Middleware - FIRST
+// CORS Middleware - Place it FIRST
+const allowedOrigins = [
+  'https://jewellary-store-pw48.vercel.app',
+  'https://www.shrivenkateshwaraenterprises.in',
+  'https://jewellary-store-liard.vercel.app',
+  'https://jewellarystore.onrender.com',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5000'
+];
+
 app.use(cors({
-  origin: [
-    'https://jewellary-store-pw48.vercel.app',
-    'https://www.shrivenkateshwaraenterprises.in',
-    'https://jewellary-store-liard.vercel.app',
-    'https://jewellarystore.onrender.com', // Add root domain
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'http://localhost:5000' // Add localhost:5000 for testing
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'auth-token', 'x-auth-token'],
+  exposedHeaders: ['auth-token'],
 }));
 
-// 2. Explicit OPTIONS handler for preflight
-app.options('*', cors());
-
-// 3. Body parsers
+// Body parsers
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Database connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.log('❌ MongoDB Connection Error:', err));
-
-// --- IMPORT ROUTES ---
-const authRoutes = require('./routes/auth');
-const productRoutes = require('./routes/products');
-const orderRoutes = require('./routes/orders');
-const customRoutes = require('./routes/customRequests');
-const userRoutes = require('./routes/users');
-const attributeRoutes = require('./routes/attributes');
-
-// 4. Add CORS headers middleware before routes
+// Add CORS headers to all responses
 app.use((req, res, next) => {
-  const allowedOrigins = [
-    'https://jewellary-store-pw48.vercel.app',
-    'https://www.shrivenkateshwaraenterprises.in',
-    'https://jewellary-store-liard.vercel.app',
-    'https://jewellarystore.onrender.com',
-    'http://localhost:5173',
-    'http://localhost:5174'
-  ];
-  
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
@@ -62,7 +50,20 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- USE ROUTES ---
+// Database connection
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch(err => console.log('❌ MongoDB Connection Error:', err));
+
+// Routes
+const authRoutes = require('./routes/auth');
+const productRoutes = require('./routes/products');
+const orderRoutes = require('./routes/orders');
+const customRoutes = require('./routes/customRequests');
+const userRoutes = require('./routes/users');
+const attributeRoutes = require('./routes/attributes');
+
+// Use routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
@@ -70,9 +71,22 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/custom', customRoutes);
 app.use('/api/attributes', attributeRoutes);
 
-// Root route
+// Root endpoint
 app.get('/', (req, res) => {
-  res.send('Jewelry Store API is Running');
+  res.json({ 
+    message: 'Jewelry Store API is Running',
+    endpoints: {
+      auth: '/api/auth',
+      products: '/api/products',
+      orders: '/api/orders',
+      users: '/api/users'
+    }
+  });
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 const PORT = process.env.PORT || 5000;
