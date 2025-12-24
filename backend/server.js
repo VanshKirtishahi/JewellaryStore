@@ -11,6 +11,7 @@ const allowedOrigins = [
   'https://www.shrivenkateshwaraenterprises.in',
   'https://jewellary-store-liard.vercel.app',
   'https://jewellarystore.onrender.com',
+  'http://admin.shrivenkateshwaraenterprises.in/',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5000'
