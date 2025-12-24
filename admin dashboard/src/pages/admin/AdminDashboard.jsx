@@ -81,8 +81,15 @@ const AdminDashboard = () => {
       ]);
 
       const products = productsRes.data || [];
-      const orders = ordersRes.data || [];
       const users = usersRes.data || [];
+
+      // --- FIX: Handle Paginated Response vs Array Response ---
+      let orders = [];
+      if (ordersRes.data.orders && Array.isArray(ordersRes.data.orders)) {
+        orders = ordersRes.data.orders; // Extract from pagination object
+      } else if (Array.isArray(ordersRes.data)) {
+        orders = ordersRes.data; // Fallback for simple array
+      }
 
       // --- Calculations (Simplified for brevity) ---
       const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
@@ -206,8 +213,15 @@ const AdminDashboard = () => {
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">#{order._id?.slice(-6).toUpperCase()}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">{order.userId?.name?.[0]?.toUpperCase() || 'U'}</div>
-                        <div><p className="text-sm font-medium text-gray-900">{order.userId?.name || 'Guest'}</p><p className="text-xs text-gray-500">{order.userId?.email || 'N/A'}</p></div>
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
+                            {/* HANDLE BOTH USER AND GUEST NAME */}
+                            {(order.userId?.name || order.guestDetails?.name || 'G')[0]?.toUpperCase()}
+                        </div>
+                        <div>
+                            {/* HANDLE BOTH USER AND GUEST NAME */}
+                            <p className="text-sm font-medium text-gray-900">{order.userId?.name || order.guestDetails?.name || 'Guest'}</p>
+                            <p className="text-xs text-gray-500">{order.userId?.email || order.guestDetails?.email || 'N/A'}</p>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500"><div className="flex items-center gap-2"><Clock size={14} />{formatDate(order.createdAt)}</div></td>
@@ -261,8 +275,12 @@ const AdminDashboard = () => {
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Users size={16} /> Customer Info</h4>
                   <div className="space-y-2 text-sm text-gray-600">
-                    <p className="flex items-center gap-2"><Users size={14} /> {selectedOrder.userId?.name || 'Guest'}</p>
-                    <p className="flex items-center gap-2"><Mail size={14} /> {selectedOrder.userId?.email || 'N/A'}</p>
+                    <p className="flex items-center gap-2">
+                        <Users size={14} /> {selectedOrder.userId?.name || selectedOrder.guestDetails?.name || 'Guest'}
+                    </p>
+                    <p className="flex items-center gap-2">
+                        <Mail size={14} /> {selectedOrder.userId?.email || selectedOrder.guestDetails?.email || 'N/A'}
+                    </p>
                     <p className="flex items-center gap-2"><Clock size={14} /> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
@@ -272,25 +290,28 @@ const AdminDashboard = () => {
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><MapPin size={16} /> Delivery Details</h4>
                   <div className="space-y-2 text-sm text-gray-600">
                     <p className="flex items-start gap-2"><MapPin size={14} className="mt-0.5 shrink-0" /> {selectedOrder.shippingAddress || 'No address provided'}</p>
-                    <p className="flex items-center gap-2"><Phone size={14} /> {selectedOrder.contactNumber || 'N/A'}</p>
-                    <p className="flex items-center gap-2"><CreditCard size={14} /> {selectedOrder.paymentMethod || 'Online Payment'}</p>
+                    {/* Handle Guest Phone or User Phone */}
+                    <p className="flex items-center gap-2">
+                        <Phone size={14} /> {selectedOrder.userId?.phone || selectedOrder.guestDetails?.phone || 'N/A'}
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Items List */}
-              <h4 className="font-semibold text-gray-900 mb-4">Order Items ({selectedOrder.items?.length || 0})</h4>
+              <h4 className="font-semibold text-gray-900 mb-4">Order Items ({selectedOrder.products?.length || 0})</h4>
               <div className="space-y-3">
-                {selectedOrder.items?.map((item, idx) => (
+                {selectedOrder.products?.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+                    {/* Fixed Image Logic */}
                     <img 
-                      src={item.image || 'https://via.placeholder.com/80'} 
-                      alt={item.name} 
+                      src={item.productId?.img || item.productId?.image || 'https://via.placeholder.com/80'} 
+                      alt={item.title || item.productId?.title} 
                       className="w-16 h-16 object-cover rounded-lg bg-gray-200"
                     />
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">{item.name}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity} {item.size && `• Size: ${item.size}`}</p>
+                      <p className="font-medium text-gray-900">{item.title || item.productId?.title}</p>
+                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                     </div>
                     <p className="font-semibold text-gray-900">{formatCurrency(item.price * item.quantity)}</p>
                   </div>

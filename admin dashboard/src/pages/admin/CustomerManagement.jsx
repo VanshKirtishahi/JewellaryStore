@@ -2,10 +2,10 @@ import { useState, useEffect, useContext } from 'react';
 import axios from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Users, Search, Mail, Phone, Calendar, MoreVertical, ShoppingBag, 
-  TrendingUp, Crown, Eye, MessageSquare, BarChart3, Shield, Star, 
-  Award, RefreshCw, Download, X, MapPin, Package, CheckCircle, Clock, Loader2
+import {
+  Users, Search, Mail, Phone, Calendar, ShoppingBag,
+  Crown, BarChart3, Shield, RefreshCw, Download, X, 
+  MapPin, Package, Loader2, Eye, CheckCircle, Clock
 } from 'lucide-react';
 
 const CustomerManagement = () => {
@@ -17,7 +17,7 @@ const CustomerManagement = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Modal State
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -35,22 +35,32 @@ const CustomerManagement = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      // We don't strictly need to manually get token if axios interceptor handles it, 
-      // but keeping your logic safe here:
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
+      // 1. Fetch Customers and Orders in parallel
       const [usersRes, ordersRes] = await Promise.all([
         axios.get('/users?role=user', config),
         axios.get('/orders', config)
       ]);
-      
-      const usersData = usersRes.data || [];
-      const ordersData = ordersRes.data || [];
 
-      setCustomers(usersData);
+      // 2. Extract Data Safely
+      const customersData = usersRes.data || [];
+      
+      // Handle Order Pagination Structure ({ orders: [...], totalPages: ... })
+      let ordersData = [];
+      if (ordersRes.data.orders && Array.isArray(ordersRes.data.orders)) {
+        ordersData = ordersRes.data.orders;
+      } else if (Array.isArray(ordersRes.data)) {
+        ordersData = ordersRes.data;
+      }
+
+      // 3. Update State
+      setCustomers(customersData);
       setOrders(ordersData);
-      calculateStats(usersData, ordersData);
+
+      // 4. Calculate Stats (Pass BOTH arrays)
+      calculateStats(customersData, ordersData);
 
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -64,10 +74,13 @@ const CustomerManagement = () => {
   };
 
   const calculateStats = (customersData, ordersData) => {
+    // Safety check to prevent crashes if data is missing
+    if (!customersData || !ordersData) return;
+
     const total = customersData.length;
-    
+
     // Active = placed at least one order
-    const active = customersData.filter(customer => 
+    const active = customersData.filter(customer =>
       ordersData.some(order => (order.userId?._id === customer._id) || (order.userId === customer._id))
     ).length;
 
@@ -78,6 +91,7 @@ const CustomerManagement = () => {
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
     const newThisMonth = customersData.filter(customer => {
+      if (!customer.createdAt) return false;
       const joinDate = new Date(customer.createdAt);
       return joinDate.getMonth() === currentMonth && joinDate.getFullYear() === currentYear;
     }).length;
@@ -88,7 +102,7 @@ const CustomerManagement = () => {
   // --- ACTIONS ---
   const handleViewDetails = (customer) => {
     // Filter orders specifically for this customer
-    const specificOrders = orders.filter(order => 
+    const specificOrders = orders.filter(order =>
       (order.userId?._id === customer._id) || (order.userId === customer._id)
     ).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
@@ -106,7 +120,7 @@ const CustomerManagement = () => {
   const getCustomerMetrics = (userId) => {
     const custOrders = orders.filter(order => (order.userId?._id === userId) || (order.userId === userId));
     const totalSpent = custOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-    
+
     let loyaltyTier = 'Bronze';
     if (totalSpent > 100000) loyaltyTier = 'Platinum';
     else if (totalSpent > 50000) loyaltyTier = 'Gold';
@@ -115,14 +129,17 @@ const CustomerManagement = () => {
     return { orderCount: custOrders.length, totalSpent, loyaltyTier };
   };
 
-  const filteredCustomers = customers.filter(customer => 
+  const filteredCustomers = customers.filter(customer =>
     customer.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     customer.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     customer.phone?.includes(searchQuery)
   );
 
   const formatCurrency = (amount) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
 
   const getTierBadge = (tier) => {
     const styles = {
@@ -143,7 +160,7 @@ const CustomerManagement = () => {
 
   return (
     <div className="space-y-8 animate-fadeIn p-6 bg-gray-50 min-h-screen">
-      
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -169,11 +186,11 @@ const CustomerManagement = () => {
         <div className="p-4 border-b border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between bg-gray-50">
           <div className="relative w-full md:w-96">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
-              placeholder="Search by name, email, or phone..." 
-              value={searchQuery} 
-              onChange={(e) => setSearchQuery(e.target.value)} 
+            <input
+              type="text"
+              placeholder="Search by name, email, or phone..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -215,11 +232,10 @@ const CustomerManagement = () => {
                       <td className="px-6 py-4">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2 text-gray-600"><Mail size={14} /> {customer.email}</div>
-                          {/* SHOW PHONE HERE */}
                           {customer.phone ? (
-                             <div className="flex items-center gap-2 text-gray-600"><Phone size={14} /> {customer.phone}</div>
+                            <div className="flex items-center gap-2 text-gray-600"><Phone size={14} /> {customer.phone}</div>
                           ) : (
-                             <div className="flex items-center gap-2 text-gray-400 text-xs italic">No phone</div>
+                            <div className="flex items-center gap-2 text-gray-400 text-xs italic">No phone</div>
                           )}
                         </div>
                       </td>
@@ -247,7 +263,7 @@ const CustomerManagement = () => {
       {showModal && selectedCustomer && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
-            
+
             {/* Modal Header */}
             <div className="flex justify-between items-start p-6 border-b border-gray-100 bg-gray-50">
               <div className="flex items-center gap-4">
@@ -287,19 +303,18 @@ const CustomerManagement = () => {
               {/* Contact & Address */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Users size={18}/> Contact Information</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Users size={18} /> Contact Information</h4>
                   <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
                     <div className="flex items-center gap-3 text-sm text-gray-600">
                       <Mail size={16} className="text-gray-400" /> {selectedCustomer.email}
                     </div>
-                    {/* MODAL PHONE DISPLAY */}
                     <div className="flex items-center gap-3 text-sm text-gray-600">
                       <Phone size={16} className="text-gray-400" /> {selectedCustomer.phone || <span className="text-gray-400 italic">No phone provided</span>}
                     </div>
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><MapPin size={18}/> Default Address</h4>
+                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><MapPin size={18} /> Default Address</h4>
                   <div className="bg-white border border-gray-200 rounded-xl p-4 text-sm text-gray-600">
                     {selectedCustomer.address || 'No address on file.'}
                   </div>
@@ -308,7 +323,7 @@ const CustomerManagement = () => {
 
               {/* Order History */}
               <div>
-                <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><Package size={18}/> Recent Orders</h4>
+                <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><Package size={18} /> Recent Orders</h4>
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
                   <table className="w-full text-sm text-left">
                     <thead className="bg-gray-50 text-gray-500 font-medium">

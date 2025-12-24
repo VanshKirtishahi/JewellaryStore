@@ -1,8 +1,10 @@
 import axios from 'axios';
 
-// CHANGE: Use the full URL of your backend server
+// Automatically chooses the right URL based on where the app is running
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api', 
+  baseURL: BASE_URL,
 });
 
 instance.interceptors.request.use(
