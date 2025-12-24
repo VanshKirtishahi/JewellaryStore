@@ -11,6 +11,7 @@ app.use(cors({
     'https://jewellary-store-pw48.vercel.app',
     'https://www.shrivenkateshwaraenterprises.in',
     'https://jewellary-store-liard.vercel.app/',
+    'https://jewellarystore.onrender.com',
     "http://localhost:5173",
     'http://localhost:5174'
   ],
