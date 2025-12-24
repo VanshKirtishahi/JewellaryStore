@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   category: { type: String, required: true },
   stock: { type: Number, default: 0 },
-  images: { type: [String] }, 
+  images: { type: [String] }, // Note: This is an Array 'images'
   material: { type: String },
   weight: { type: Number },
   discount: { type: Number, default: 0 },
@@ -26,22 +26,29 @@ const productSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // 3. ORDERS
-const orderSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  products: [{
-      productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-      name: String,
-      image: String,
-      quantity: { type: Number, default: 1 },
-      price: Number
-  }],
-  totalAmount: { type: Number, required: true },
-  status: { type: String, default: 'Pending' },
-  paymentMethod: { type: String, default: 'Online' },
-  shippingAddress: { type: String, required: true },
-  contactNumber: { type: String },
-  createdAt: { type: Date, default: Date.now }
-});
+const OrderSchema = new mongoose.Schema(
+  {
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    guestDetails: {
+      name: { type: String },
+      email: { type: String },
+      phone: { type: String }
+    },
+    products: [
+      {
+        productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+        title: { type: String },
+        quantity: { type: Number, default: 1 },
+        price: { type: Number },
+      },
+    ],
+    totalAmount: { type: Number, required: true },
+    // CHANGED TO STRING TO MATCH FRONTEND FORM
+    shippingAddress: { type: String, required: true }, 
+    status: { type: String, default: "Pending" },
+  },
+  { timestamps: true }
+);
 
 // 4. CUSTOM REQUESTS
 const customRequestSchema = new mongoose.Schema({
@@ -55,17 +62,16 @@ const customRequestSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// 5. ATTRIBUTES (New! Stores Categories & Materials)
+// 5. ATTRIBUTES
 const attributeSchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true }, // e.g., "Rose Gold"
+  name: { type: String, required: true, unique: true },
   type: { type: String, required: true, enum: ['category', 'material'] } 
 });
 
-// EXPORT
 module.exports = {
   User: mongoose.model('User', userSchema),
   Product: mongoose.model('Product', productSchema),
-  Order: mongoose.model('Order', orderSchema),
+  Order: mongoose.model('Order', OrderSchema),
   CustomRequest: mongoose.model('CustomRequest', customRequestSchema),
-  Attribute: mongoose.model('Attribute', attributeSchema) // Export the new model
+  Attribute: mongoose.model('Attribute', attributeSchema)
 };
