@@ -10,6 +10,7 @@ app.use(cors({
   origin: [
     'https://jewellary-store-pw48.vercel.app',
     'https://www.shrivenkateshwaraenterprises.in',
+    'https://jewellary-store-liard.vercel.app/',
     "http://localhost:5173",
     'http://localhost:5174'
   ],
