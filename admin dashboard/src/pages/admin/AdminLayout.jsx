@@ -6,6 +6,7 @@ import {
 import { useState, useContext, useEffect } from 'react';
 // FIX: Correct import path
 import { AuthContext } from '../../context/AuthContext';
+import vkLogo from '../assets/VK-Logo.png';
 
 const AdminLayout = () => {
   const { logout, user } = useContext(AuthContext);
@@ -137,7 +138,7 @@ const AdminLayout = () => {
           </div>
           <div className="flex items-center gap-4 w-20">
             {/* You can add notifications/search here later */}
-            <img src="/src/assets/VK-Logo.png" alt="logo" className="h-10 w-auto object-contain" />
+            <img src={vkLogo} alt="logo" className="h-10 w-auto object-contain" />
           </div>
         </header>
 

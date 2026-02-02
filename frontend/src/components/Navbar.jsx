@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { CartContext } from '../context/CartContext';
+import vkLogo from '../assets/VK-Logo.png';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -120,9 +121,8 @@ const Navbar = () => {
             <div className="w-16 h-16 bg-gradient-to-br to-amber-500 rounded-lg flex items-center justify-center text-white font-bold text-lg relative overflow-hidden">
               {/* Replaced Crown with Logo Image */}
               <img
-                src="src/assets/VK-Logo.png"
-                alt="Logo"
-                /* Added w-full h-full to make sure it fills the larger container */
+                src={vkLogo}
+                alt="Venkateshwara Enterprises Logo"
                 className="w-full h-full object-contain"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
