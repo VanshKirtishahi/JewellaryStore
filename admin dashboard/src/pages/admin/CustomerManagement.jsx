@@ -4,7 +4,7 @@ import { AuthContext } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
   Users, Search, Mail, Phone, Calendar, ShoppingBag,
-  Crown, BarChart3, Shield, RefreshCw, Download, X, 
+  Crown, BarChart3, Shield, RefreshCw, Download, X,
   MapPin, Package, Loader2, Eye, CheckCircle, Clock
 } from 'lucide-react';
 
@@ -46,7 +46,7 @@ const CustomerManagement = () => {
 
       // 2. Extract Data Safely
       const customersData = usersRes.data || [];
-      
+
       // Handle Order Pagination Structure ({ orders: [...], totalPages: ... })
       let ordersData = [];
       if (ordersRes.data.orders && Array.isArray(ordersRes.data.orders)) {
@@ -325,35 +325,37 @@ const CustomerManagement = () => {
               <div>
                 <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2"><Package size={18} /> Recent Orders</h4>
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-500 font-medium">
-                      <tr>
-                        <th className="px-4 py-3">Order ID</th>
-                        <th className="px-4 py-3">Date</th>
-                        <th className="px-4 py-3">Status</th>
-                        <th className="px-4 py-3 text-right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {customerOrders.length === 0 ? (
-                        <tr><td colSpan="4" className="px-4 py-6 text-center text-gray-500">No orders placed yet.</td></tr>
-                      ) : (
-                        customerOrders.map(order => (
-                          <tr key={order._id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 font-mono text-xs text-gray-500">#{order._id.slice(-6).toUpperCase()}</td>
-                            <td className="px-4 py-3 text-gray-600">{formatDate(order.createdAt)}</td>
-                            <td className="px-4 py-3">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
-                                ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                                {order.status}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right font-medium">{formatCurrency(order.totalAmount)}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left min-w-[400px]">
+                      <thead className="bg-gray-50 text-gray-500 font-medium">
+                        <tr>
+                          <th className="px-4 py-3">Order ID</th>
+                          <th className="px-4 py-3">Date</th>
+                          <th className="px-4 py-3">Status</th>
+                          <th className="px-4 py-3 text-right">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {customerOrders.length === 0 ? (
+                          <tr><td colSpan="4" className="px-4 py-6 text-center text-gray-500">No orders placed yet.</td></tr>
+                        ) : (
+                          customerOrders.map(order => (
+                            <tr key={order._id} className="hover:bg-gray-50">
+                              <td className="px-4 py-3 font-mono text-xs text-gray-500">#{order._id.slice(-6).toUpperCase()}</td>
+                              <td className="px-4 py-3 text-gray-600">{formatDate(order.createdAt)}</td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                  ${order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                  {order.status}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right font-medium">{formatCurrency(order.totalAmount)}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import axios from '../../api/axios';
-import { 
+import {
   ShoppingBag,
   Gem,
   DollarSign,
@@ -21,12 +21,12 @@ import { useNavigate } from 'react-router-dom';
 const UserDashboard = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  
+
   // Data State
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ 
-    orders: 0, 
-    spent: 0, 
+  const [stats, setStats] = useState({
+    orders: 0,
+    spent: 0,
     requests: 0,
     pendingOrders: 0,
     loyaltyPoints: 0,
@@ -40,7 +40,7 @@ const UserDashboard = () => {
     const fetchUserData = async () => {
       try {
         if (!user) return;
-        
+
         // Support both _id (MongoDB) and id
         const userId = user._id || user.id;
 
@@ -48,17 +48,17 @@ const UserDashboard = () => {
           axios.get(`/orders/find/${userId}`),
           axios.get(`/custom/user/${userId}`)
         ]);
-        
+
         const orders = ordersRes.data || [];
         const requests = requestsRes.data || [];
 
         // 1. Process Order Stats
         const pendingCount = orders.filter(o => ['Pending', 'Processing', 'Shipped'].includes(o.status)).length;
         const totalSpent = orders.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
-        
+
         // 2. Calculate Loyalty Logic (e.g., 1 point per $10)
         const loyaltyPoints = Math.floor(totalSpent / 10);
-        
+
         let memberLevel = 'Silver';
         if (loyaltyPoints > 500) memberLevel = 'Gold';
         if (loyaltyPoints > 2000) memberLevel = 'Platinum';
@@ -72,14 +72,14 @@ const UserDashboard = () => {
           loyaltyPoints,
           memberLevel
         });
-        
+
         // 3. Sort & Slice Recent Activity
         const sortedOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setRecentOrders(sortedOrders.slice(0, 5));
-        
+
         const sortedRequests = [...requests].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setRecentRequests(sortedRequests.slice(0, 3));
-        
+
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
       } finally {
@@ -136,7 +136,7 @@ const UserDashboard = () => {
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      
+
       {/* 1. Welcome Header */}
       <div className="bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
@@ -149,7 +149,7 @@ const UserDashboard = () => {
               You have <span className="font-bold text-amber-400">{stats.pendingOrders} active orders</span> and <span className="font-bold text-amber-400">{stats.loyaltyPoints} loyalty points</span>.
             </p>
           </div>
-          <button 
+          <button
             onClick={() => navigate('/collections')}
             className="px-6 py-3 bg-white text-gray-900 rounded-xl font-bold hover:bg-amber-50 transition-colors flex items-center gap-2 shadow-lg"
           >
@@ -219,19 +219,19 @@ const UserDashboard = () => {
 
       {/* 3. Recent Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
+
         {/* Recent Orders */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
           <div className="p-6 border-b border-gray-50 flex justify-between items-center">
             <h2 className="text-lg font-bold text-gray-900">Recent Orders</h2>
-            <button 
+            <button
               onClick={() => navigate('/user/orders')}
               className="text-sm text-jewel-gold hover:text-amber-700 font-medium flex items-center gap-1"
             >
               View All <ChevronRight size={16} />
             </button>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto">
             {recentOrders.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
@@ -241,7 +241,7 @@ const UserDashboard = () => {
             ) : (
               <div className="divide-y divide-gray-50">
                 {recentOrders.map((order) => (
-                  <div key={order._id} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                  <div key={order._id} className="p-4 hover:bg-gray-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className={`p-2 rounded-lg border ${getStatusColor(order.status)} bg-opacity-20`}>
                         {getStatusIcon(order.status)}
@@ -251,9 +251,9 @@ const UserDashboard = () => {
                         <p className="text-xs text-gray-500">{formatDate(order.createdAt)}</p>
                       </div>
                     </div>
-                    <div className="text-right">
+                    <div className="flex items-center justify-between sm:block text-right w-full sm:w-auto pl-14 sm:pl-0">
                       <p className="font-bold text-gray-900">{formatCurrency(order.totalAmount)}</p>
-                      <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusColor(order.status)}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border ${getStatusColor(order.status)} inline-block mt-1`}>
                         {order.status}
                       </span>
                     </div>
@@ -268,20 +268,20 @@ const UserDashboard = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
           <div className="p-6 border-b border-gray-50 flex justify-between items-center">
             <h2 className="text-lg font-bold text-gray-900">Custom Requests</h2>
-            <button 
+            <button
               onClick={() => navigate('/user/requests')}
               className="text-sm text-jewel-gold hover:text-amber-700 font-medium flex items-center gap-1"
             >
               View All <ChevronRight size={16} />
             </button>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto">
             {recentRequests.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <Gem size={48} className="mx-auto mb-3 text-gray-300" />
                 <p>No custom requests yet.</p>
-                <button 
+                <button
                   onClick={() => navigate('/custom-request')}
                   className="mt-4 text-sm text-jewel-gold underline"
                 >
@@ -291,7 +291,7 @@ const UserDashboard = () => {
             ) : (
               <div className="divide-y divide-gray-50">
                 {recentRequests.map((req) => (
-                  <div key={req._id} className="p-4 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                  <div key={req._id} className="p-4 hover:bg-gray-50 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="p-2 rounded-lg bg-purple-50 text-purple-600">
                         <Gem size={20} />
@@ -301,12 +301,13 @@ const UserDashboard = () => {
                         <p className="text-xs text-gray-500">{formatDate(req.createdAt)}</p>
                       </div>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full border ${
-                      req.status === 'Completed' ? 'bg-green-50 border-green-200 text-green-700' : 
-                      'bg-gray-50 border-gray-200 text-gray-600'
-                    }`}>
-                      {req.status}
-                    </span>
+                    <div className="flex items-center justify-between sm:block text-right w-full sm:w-auto pl-14 sm:pl-0">
+                      <span className={`text-xs px-2 py-1 rounded-full border ${req.status === 'Completed' ? 'bg-green-50 border-green-200 text-green-700' :
+                          'bg-gray-50 border-gray-200 text-gray-600'
+                        }`}>
+                        {req.status}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>

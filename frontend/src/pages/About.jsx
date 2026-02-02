@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Gem, 
-  Crown, 
-  Award, 
-  Sparkles, 
-  Users, 
-  Heart, 
-  Shield, 
+import {
+  Gem,
+  Crown,
+  Award,
+  Sparkles,
+  Users,
+  Heart,
+  Shield,
   Clock,
   MapPin,
   Phone,
@@ -27,53 +27,53 @@ const About = () => {
   ];
 
   const values = [
-    { 
-      icon: <Heart size={28} />, 
-      title: 'Passion for Craftsmanship', 
-      description: 'Every piece is handcrafted with love and attention to detail' 
+    {
+      icon: <Heart size={28} />,
+      title: 'Passion for Craftsmanship',
+      description: 'Every piece is handcrafted with love and attention to detail'
     },
-    { 
-      icon: <Shield size={28} />, 
-      title: 'Integrity & Trust', 
-      description: 'We believe in transparency and honest relationships' 
+    {
+      icon: <Shield size={28} />,
+      title: 'Integrity & Trust',
+      description: 'We believe in transparency and honest relationships'
     },
-    { 
-      icon: <Gem size={28} />, 
-      title: 'Excellence in Quality', 
-      description: 'Only the finest materials meet our standards' 
+    {
+      icon: <Gem size={28} />,
+      title: 'Excellence in Quality',
+      description: 'Only the finest materials meet our standards'
     },
-    { 
-      icon: <Users size={28} />, 
-      title: 'Customer First', 
-      description: 'Your satisfaction is our ultimate goal' 
+    {
+      icon: <Users size={28} />,
+      title: 'Customer First',
+      description: 'Your satisfaction is our ultimate goal'
     },
   ];
 
   const team = [
-    { 
-      name: 'Rajesh Sharma', 
-      role: 'Master Jeweler', 
+    {
+      name: 'Rajesh Sharma',
+      role: 'Master Jeweler',
       experience: '40+ years',
       specialty: 'Diamond Setting',
       image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
     },
-    { 
-      name: 'Priya Patel', 
-      role: 'Design Director', 
+    {
+      name: 'Priya Patel',
+      role: 'Design Director',
       experience: '25+ years',
       specialty: 'Custom Designs',
       image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
     },
-    { 
-      name: 'Michael Chen', 
-      role: 'Gemologist', 
+    {
+      name: 'Michael Chen',
+      role: 'Gemologist',
       experience: '30+ years',
       specialty: 'Gemstone Certification',
       image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
     },
-    { 
-      name: 'Sophia Williams', 
-      role: 'Customer Experience', 
+    {
+      name: 'Sophia Williams',
+      role: 'Customer Experience',
       experience: '15+ years',
       specialty: 'Client Consultations',
       image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
@@ -100,7 +100,7 @@ const About = () => {
         </div>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-6">
               Our Story of <span className="text-jewel-gold">Elegance</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-10">
@@ -127,11 +127,11 @@ const About = () => {
               </h2>
               <div className="space-y-4 text-gray-600">
                 <p>
-                  Founded with a vision to create jewelry that tells stories, Venkateshwara Fine Jewelry began as a small family workshop in Mumbai. 
+                  Founded with a vision to create jewelry that tells stories, Venkateshwara Fine Jewelry began as a small family workshop in Mumbai.
                   Today, we're a globally recognized name, known for our exquisite craftsmanship and uncompromising quality.
                 </p>
                 <p>
-                  Our journey has been guided by one simple principle: every piece should be as unique and precious as the moment it celebrates. 
+                  Our journey has been guided by one simple principle: every piece should be as unique and precious as the moment it celebrates.
                   From engagement rings that mark the beginning of forever to heirlooms that connect generations, we create jewelry that lasts a lifetime.
                 </p>
                 <p>
@@ -165,11 +165,11 @@ const About = () => {
               The principles that guide every piece we create and every relationship we build
             </p>
           </div>
-          
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {values.map((value, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 hover:shadow-xl transition-all duration-500 hover:-translate-y-2"
               >
                 <div className="w-16 h-16 bg-gradient-to-br from-jewel-gold/10 to-amber-500/10 rounded-2xl flex items-center justify-center mb-6">
@@ -205,7 +205,7 @@ const About = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="bg-gradient-to-br from-jewel-gold/10 to-amber-500/10 rounded-2xl p-8 border border-jewel-gold/20">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-16 h-16 bg-gradient-to-r from-jewel-gold to-amber-500 rounded-2xl flex items-center justify-center">

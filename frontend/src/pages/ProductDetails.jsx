@@ -2,13 +2,13 @@ import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from '../api/axios';
 import { CartContext } from '../context/CartContext';
-import { 
-  ArrowLeft, 
-  ShoppingBag, 
-  Heart, 
-  Share2, 
-  Truck, 
-  Shield, 
+import {
+  ArrowLeft,
+  ShoppingBag,
+  Heart,
+  Share2,
+  Truck,
+  Shield,
   CheckCircle,
   Star,
   Gem,
@@ -42,7 +42,7 @@ const ProductDetails = () => {
   const [showZoomModal, setShowZoomModal] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
   const [relatedProducts, setRelatedProducts] = useState([]);
-  
+
   const tabs = [
     { id: 'details', label: 'Product Details', icon: <Gem size={16} /> },
     { id: 'specifications', label: 'Specifications', icon: <Package size={16} /> },
@@ -57,13 +57,13 @@ const ProductDetails = () => {
         setError('');
         const res = await axios.get(`/products/find/${id}`);
         setProduct(res.data);
-        
+
         // Fetch related products
         try {
-            const relatedRes = await axios.get(`/products/related/${res.data.category}`);
-            setRelatedProducts(relatedRes.data.slice(0, 4));
+          const relatedRes = await axios.get(`/products/related/${res.data.category}`);
+          setRelatedProducts(relatedRes.data.slice(0, 4));
         } catch (relatedErr) {
-            console.warn("Could not fetch related products", relatedErr);
+          console.warn("Could not fetch related products", relatedErr);
         }
 
       } catch (err) {
@@ -192,14 +192,14 @@ const ProductDetails = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Images */}
           <div className="space-y-4">
-            <div 
+            <div
               className="relative bg-gradient-to-br from-gray-50 to-white rounded-2xl overflow-hidden shadow-lg border border-gray-200 cursor-zoom-in"
               onClick={() => setShowZoomModal(true)}
             >
               <img
                 src={images[selectedImageIndex]}
                 alt={product.title}
-                className="w-full h-[500px] object-contain transition-transform duration-300 hover:scale-105"
+                className="w-full h-auto aspect-square sm:h-[500px] object-contain transition-transform duration-300 hover:scale-105"
               />
               <div className="absolute top-4 left-4 flex flex-col gap-2">
                 {product.featured && (
@@ -212,13 +212,12 @@ const ProductDetails = () => {
                     -{discountInfo.percentage}%
                   </span>
                 )}
-                <span className={`px-3 py-1.5 text-xs font-bold rounded-full ${
-                  stockStatus === 'in' ? 'bg-green-100 text-green-800' : stockStatus === 'low' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'
-                }`}>
+                <span className={`px-3 py-1.5 text-xs font-bold rounded-full ${stockStatus === 'in' ? 'bg-green-100 text-green-800' : stockStatus === 'low' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800'
+                  }`}>
                   {stockStatus === 'in' ? 'In Stock' : stockStatus === 'low' ? 'Low Stock' : 'Out of Stock'}
                 </span>
               </div>
-              <button 
+              <button
                 className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors duration-300"
                 onClick={(e) => { e.stopPropagation(); toggleWishlist(); }}
               >
@@ -231,9 +230,8 @@ const ProductDetails = () => {
                 <button
                   key={index}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-                    selectedImageIndex === index ? 'border-jewel-gold scale-110' : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                  className={`shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 ${selectedImageIndex === index ? 'border-jewel-gold scale-110' : 'border-gray-200 hover:border-gray-300'
+                    }`}
                 >
                   <img src={img} alt={`View ${index + 1}`} className="w-full h-full object-cover" />
                 </button>
@@ -310,23 +308,21 @@ const ProductDetails = () => {
                 <button
                   onClick={handleAddToCart}
                   disabled={product.stock === 0}
-                  className={`py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-                    product.stock > 0
+                  className={`py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 ${product.stock > 0
                       ? 'bg-gradient-to-r from-jewel-gold to-amber-500 text-white hover:from-amber-500 hover:to-jewel-gold hover:shadow-xl'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                    }`}
                 >
                   <ShoppingBag size={20} />
                   {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
                 </button>
-                
+
                 {/* BUY NOW */}
-                <button 
-                  onClick={handleBuyNow} 
+                <button
+                  onClick={handleBuyNow}
                   disabled={product.stock === 0}
-                  className={`py-4 border-2 border-gray-900 text-gray-900 rounded-xl font-bold hover:bg-gray-900 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 ${
-                    product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                  className={`py-4 border-2 border-gray-900 text-gray-900 rounded-xl font-bold hover:bg-gray-900 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                 >
                   <CreditCard size={20} />
                   Buy Now
@@ -336,9 +332,8 @@ const ProductDetails = () => {
               <div className="flex gap-4">
                 <button
                   onClick={toggleWishlist}
-                  className={`flex-1 py-3 rounded-lg border flex items-center justify-center gap-2 transition-colors duration-300 ${
-                    isInWishlist ? 'border-red-500 text-red-500 hover:bg-red-50' : 'border-gray-300 text-gray-700 hover:border-jewel-gold hover:text-jewel-gold'
-                  }`}
+                  className={`flex-1 py-3 rounded-lg border flex items-center justify-center gap-2 transition-colors duration-300 ${isInWishlist ? 'border-red-500 text-red-500 hover:bg-red-50' : 'border-gray-300 text-gray-700 hover:border-jewel-gold hover:text-jewel-gold'
+                    }`}
                 >
                   <Heart size={18} className={isInWishlist ? 'fill-red-500' : ''} />
                   {isInWishlist ? 'Saved' : 'Save for Later'}
@@ -353,8 +348,8 @@ const ProductDetails = () => {
 
         {/* Tabs & Related Products (Truncated for brevity, but same as original) */}
         <div className="mt-16">
-           {/* ... (Existing Tabs Code) ... */}
-           {/* You can copy the Tabs and Related Products section from the original file here if needed */}
+          {/* ... (Existing Tabs Code) ... */}
+          {/* You can copy the Tabs and Related Products section from the original file here if needed */}
         </div>
 
       </div>

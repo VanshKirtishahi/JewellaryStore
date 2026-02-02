@@ -1,11 +1,11 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  Gem, 
-  Settings, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Gem,
+  Settings,
+  LogOut,
+  Menu,
   Bell,
   Search,
   ChevronRight,
@@ -14,7 +14,12 @@ import {
   Package,
   Shield,
   Sparkles,
-  Loader2
+  Loader2,
+  XCircle,
+  Home,
+  Star,
+  Users,
+  ShoppingCart
 } from 'lucide-react';
 import { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../../context/AuthContext';
@@ -24,14 +29,14 @@ const UserLayout = () => {
   const { user, logout, loading: authLoading } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // UI State
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
-  
+
   // User Data State
   const [userStats, setUserStats] = useState({
     ordersCount: 0,
@@ -50,7 +55,7 @@ const UserLayout = () => {
     const fetchData = async () => {
       // Wait for auth to finish loading
       if (authLoading) return;
-      
+
       // If no user after loading, redirect to login
       if (!user) {
         navigate('/login');
@@ -66,15 +71,15 @@ const UserLayout = () => {
           axios.get(`/orders/find/${userId}`),
           axios.get(`/custom/user/${userId}`)
         ]);
-        
+
         const orders = ordersRes.data || [];
         const requests = requestsRes.data || [];
 
         // Calculate Stats
         const totalSpent = orders.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0);
         // Example logic: 1 point per $10 spent
-        const loyaltyPoints = Math.floor(totalSpent / 10); 
-        
+        const loyaltyPoints = Math.floor(totalSpent / 10);
+
         let memberLevel = 'Silver';
         if (loyaltyPoints > 500) memberLevel = 'Gold';
         if (loyaltyPoints > 2000) memberLevel = 'Platinum';
@@ -107,7 +112,7 @@ const UserLayout = () => {
       if (mobile) setIsSidebarOpen(false);
       else setIsSidebarOpen(true);
     };
-    
+
     handleResize(); // Initial check
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -151,39 +156,48 @@ const UserLayout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      
+    <div className="flex h-screen bg-gray-50 overflow-hidden relative">
+
       {/* Mobile Overlay */}
       {isMobile && isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
+        <div
+          className="fixed inset-0 bg-black/50 z-20 backdrop-blur-sm transition-opacity"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       {/* --- SIDEBAR --- */}
-      <aside 
-        className={`fixed lg:sticky top-0 left-0 z-50 h-screen bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col
-        ${isSidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-20'}
-        `}
+      <aside
+        className={`${isMobile
+          ? `fixed inset-y-0 left-0 z-30 w-64 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
+          : `relative ${isSidebarOpen ? 'w-64' : 'w-20'}`
+          } bg-white border-r border-gray-200 transition-all duration-300 ease-in-out flex flex-col flex-shrink-0 z-30`}
       >
         {/* Sidebar Header */}
-        <div className="h-16 flex items-center justify-center border-b border-gray-100">
-          <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 flex items-center justify-center text-white font-serif  group-hover:scale-105 transition-transform">
-              <img src="src/assets/VK-Logo.png" alt="logo"/>
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100">
+          <Link to="/" className={`flex items-center gap-2 group ${!isSidebarOpen && !isMobile && 'justify-center w-full'}`}>
+            <div className="w-8 h-8 flex items-center justify-center text-white font-serif group-hover:scale-105 transition-transform shrink-0">
+              <img src="src/assets/VK-Logo.png" alt="logo" className="w-full h-full object-contain" />
             </div>
-            {isSidebarOpen && (
+            {(isSidebarOpen || isMobile) && (
               <span className="font-serif font-bold text-gray-900 text-lg tracking-wide whitespace-nowrap opacity-100 transition-opacity">
                 Venkateshwara
               </span>
             )}
           </Link>
+
+          {/* Sidebar Toggle (Desktop) / Close (Mobile) */}
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className={`p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-900 transition-colors ${!isSidebarOpen && !isMobile && 'hidden'}`}
+          >
+            {isMobile ? <XCircle size={20} /> : <Menu size={20} />}
+          </button>
         </div>
 
         {/* User Mini Profile (Sidebar) */}
         {isSidebarOpen && (
-          <div className="p-6 text-center border-b border-gray-50">
+          <div className="p-6 text-center border-b border-gray-50 animate-in fade-in zoom-in duration-300">
             <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center text-2xl font-bold text-jewel-gold mb-3 border-2 border-white shadow-sm">
               {user?.name?.charAt(0).toUpperCase()}
             </div>
@@ -193,32 +207,34 @@ const UserLayout = () => {
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+        <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto custom-scrollbar">
           {navItems.map((item) => {
             const isActive = location.pathname.startsWith(item.path);
             const Icon = item.icon;
-            
+
             return (
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => isMobile && setIsSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative
-                  ${isActive 
-                    ? 'bg-jewel-gold/10 text-jewel-gold font-medium' 
+                  ${isActive
+                    ? 'bg-jewel-gold/10 text-jewel-gold font-medium'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }
+                  ${!isSidebarOpen && !isMobile ? 'justify-center' : ''}
                 `}
                 title={!isSidebarOpen ? item.label : ''}
               >
-                <Icon size={20} className={isActive ? 'text-jewel-gold' : 'text-gray-500 group-hover:text-gray-700'} />
-                
-                <span className={`whitespace-nowrap transition-all duration-300 ${!isSidebarOpen ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100'}`}>
+                <Icon size={20} className={`shrink-0 ${isActive ? 'text-jewel-gold' : 'text-gray-500 group-hover:text-gray-700'}`} />
+
+                <span className={`whitespace-nowrap transition-all duration-300 ${!isSidebarOpen && !isMobile ? 'hidden' : 'opacity-100'}`}>
                   {item.label}
                 </span>
 
                 {/* Active Indicator Bar */}
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-jewel-gold rounded-r-full" />
+                  <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-jewel-gold rounded-r-full ${!isSidebarOpen && !isMobile ? 'left-1' : ''}`} />
                 )}
               </Link>
             );
@@ -230,47 +246,68 @@ const UserLayout = () => {
           <button
             onClick={handleLogout}
             className={`flex items-center gap-3 w-full px-3 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-colors
-              ${!isSidebarOpen ? 'justify-center' : ''}
+              ${!isSidebarOpen && !isMobile ? 'justify-center' : ''}
             `}
+            title={!isSidebarOpen ? "Sign Out" : ""}
           >
-            <LogOut size={20} />
-            {isSidebarOpen && <span>Sign Out</span>}
+            <LogOut size={20} className="shrink-0" />
+            {(isSidebarOpen || isMobile) && <span>Sign Out</span>}
           </button>
         </div>
       </aside>
 
 
       {/* --- MAIN CONTENT --- */}
-      <div className="flex-1 flex flex-col min-w-0">
-        
+      <div className="flex-1 flex flex-col min-w-0 h-full w-full">
+
         {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-200 sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg lg:hidden"
-            >
-              <Menu size={20} />
-            </button>
-            <h1 className="text-xl font-bold text-gray-800 capitalize">
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 shadow-sm z-10 shrink-0">
+          <div className="flex items-center gap-3">
+            {isMobile && !isSidebarOpen && (
+              <button
+                onClick={() => setIsSidebarOpen(true)}
+                className="p-2 -ml-2 text-gray-500 hover:bg-gray-100 rounded-lg"
+              >
+                <Menu size={20} />
+              </button>
+            )}
+            <h1 className="text-lg sm:text-xl font-bold text-gray-800 capitalize truncate max-w-[200px] sm:max-w-none">
               {location.pathname.split('/').pop().replace('-', ' ')}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Quick Nav Links (Desktop) */}
+          <div className="hidden lg:flex items-center gap-8 mx-6">
+            <Link to="/" className="text-sm font-medium text-gray-500 hover:text-jewel-gold transition-colors">Home</Link>
+            <Link to="/collections" className="text-sm font-medium text-gray-500 hover:text-jewel-gold transition-colors">Collections</Link>
+            <Link to="/custom-request" className="text-sm font-medium text-gray-500 hover:text-jewel-gold transition-colors">Design</Link>
+            <Link to="/about" className="text-sm font-medium text-gray-500 hover:text-jewel-gold transition-colors">About</Link>
+          </div>
+
+          <div className="flex items-center gap-2 sm:gap-4">
             {/* Search Bar (Hidden on Mobile) */}
             <div className="hidden md:flex items-center bg-gray-100 rounded-full px-4 py-2 w-64 focus-within:ring-2 focus-within:ring-jewel-gold/20 transition-all">
               <Search size={18} className="text-gray-400" />
-              <input 
-                type="text" 
-                placeholder="Search..." 
+              <input
+                type="text"
+                placeholder="Search..."
                 className="bg-transparent border-none focus:ring-0 text-sm ml-2 w-full text-gray-700 placeholder-gray-400"
               />
             </div>
 
+            {/* Mobile Search Icon */}
+            <button className="md:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-lg">
+              <Search size={20} />
+            </button>
+
+            {/* Cart Icon */}
+            <Link to="/cart" className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors relative">
+              <ShoppingCart size={20} />
+            </Link>
+
             {/* Notifications */}
             <div className="relative" ref={notifRef}>
-              <button 
+              <button
                 className="p-2 text-gray-500 hover:bg-gray-100 rounded-full relative transition-colors"
                 onClick={() => setShowNotifications(!showNotifications)}
               >
@@ -279,7 +316,7 @@ const UserLayout = () => {
                   <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
                 )}
               </button>
-              
+
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-2 animate-in fade-in slide-in-from-top-2">
                   <div className="px-4 py-2 border-b border-gray-50 flex justify-between items-center">
@@ -299,7 +336,7 @@ const UserLayout = () => {
 
             {/* Profile Dropdown */}
             <div className="relative" ref={profileRef}>
-              <button 
+              <button
                 className="flex items-center gap-2 pl-2"
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               >
@@ -315,15 +352,15 @@ const UserLayout = () => {
                     <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
                     <p className="text-xs text-gray-500 truncate">{user?.email}</p>
                   </div>
-                  <Link 
-                    to="/user/settings" 
+                  <Link
+                    to="/user/settings"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                     onClick={() => setShowProfileDropdown(false)}
                   >
                     Account Settings
                   </Link>
                   <div className="border-t border-gray-50 my-1"></div>
-                  <button 
+                  <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
@@ -336,15 +373,15 @@ const UserLayout = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 overflow-y-auto">
           {isLoadingStats ? (
-             <div className="flex h-full items-center justify-center">
-                <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
-             </div>
+            <div className="flex h-full items-center justify-center">
+              <Loader2 className="w-8 h-8 text-gray-300 animate-spin" />
+            </div>
           ) : (
             <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-               {/* Pass userStats down to children via context or props if needed by Outlet components */}
-               <Outlet context={{ userStats, user }} />
+              {/* Pass userStats down to children via context or props if needed by Outlet components */}
+              <Outlet context={{ userStats, user }} />
             </div>
           )}
         </main>

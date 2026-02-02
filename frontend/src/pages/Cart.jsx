@@ -55,7 +55,7 @@ const Cart = () => {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
         <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-            <ShoppingBag size={40} className="text-gray-400" />
+          <ShoppingBag size={40} className="text-gray-400" />
         </div>
         <h2 className="text-3xl font-serif font-bold text-gray-800 mb-4">Your Cart is Empty</h2>
         <p className="text-gray-500 mb-8 max-w-md">Looks like you haven't discovered our treasures yet. Browse our collection to find something timeless.</p>
@@ -69,36 +69,36 @@ const Cart = () => {
   return (
     <div className="container mx-auto px-6 py-12">
       <h1 className="text-3xl font-serif font-bold mb-8">Shopping Bag ({cartItems.length} items)</h1>
-      
+
       <div className="flex flex-col lg:flex-row gap-12">
         {/* Cart Items List */}
         <div className="flex-1 space-y-6">
           {cartItems.map((item) => (
-            <div key={item._id} className="flex gap-6 p-6 bg-white rounded-xl shadow-sm border border-gray-100 transition hover:shadow-md">
-              <div className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+            <div key={item._id} className="flex gap-4 sm:gap-6 p-4 sm:p-6 bg-white rounded-xl shadow-sm border border-gray-100 transition hover:shadow-md">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                 <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
               </div>
-              
-              <div className="flex-1 flex justify-between">
+
+              <div className="flex-1 flex flex-col sm:flex-row sm:justify-between gap-4">
                 <div>
-                  <h3 className="font-bold text-lg text-gray-900 mb-1">{item.title}</h3>
-                  <p className="text-gray-500 text-sm mb-2 uppercase tracking-wider">{item.category}</p>
-                  <p className="font-serif text-jewel-gold font-bold text-lg">
+                  <h3 className="font-bold text-base sm:text-lg text-gray-900 mb-1 line-clamp-1">{item.title}</h3>
+                  <p className="text-gray-500 text-xs sm:text-sm mb-2 uppercase tracking-wider">{item.category}</p>
+                  <p className="font-serif text-jewel-gold font-bold text-base sm:text-lg">
                     {formatCurrency(item.price)}
                   </p>
                 </div>
-                
-                <div className="flex flex-col items-end justify-between">
-                  <button 
-                    onClick={() => removeFromCart(item._id)} 
-                    className="group p-2 hover:bg-red-50 rounded-full transition-colors"
-                    title="Remove item"
-                  >
-                    <Trash2 size={20} className="text-gray-400 group-hover:text-red-500 transition-colors" />
-                  </button>
-                  <div className="bg-gray-50 px-4 py-1 rounded-full text-sm font-medium text-gray-600 border border-gray-100">
+
+                <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-between w-full sm:w-auto mt-2 sm:mt-0">
+                  <div className="bg-gray-50 px-3 py-1 rounded-full text-xs sm:text-sm font-medium text-gray-600 border border-gray-100">
                     Qty: {item.qty}
                   </div>
+                  <button
+                    onClick={() => removeFromCart(item._id)}
+                    className="group p-2 hover:bg-red-50 rounded-full transition-colors ml-auto sm:ml-0"
+                    title="Remove item"
+                  >
+                    <Trash2 size={18} className="text-gray-400 group-hover:text-red-500 transition-colors" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -122,7 +122,7 @@ const Cart = () => {
               <span>{formatCurrency(total)}</span>
             </div>
           </div>
-          <button 
+          <button
             onClick={handleCheckout}
             className="w-full bg-black text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-800 transition-all group shadow-lg hover:shadow-xl"
           >

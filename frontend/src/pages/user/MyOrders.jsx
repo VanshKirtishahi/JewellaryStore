@@ -1,13 +1,13 @@
 import { useState, useEffect, useContext } from 'react';
 import axios from '../../api/axios';
 import { AuthContext } from '../../context/AuthContext';
-import { 
-  ShoppingBag, 
-  Calendar, 
-  Clock, 
-  CheckCircle, 
-  Package, 
-  Truck, 
+import {
+  ShoppingBag,
+  Calendar,
+  Clock,
+  CheckCircle,
+  Package,
+  Truck,
   XCircle,
   Search,
   ChevronDown,
@@ -27,7 +27,7 @@ const MyOrders = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [expandedOrder, setExpandedOrder] = useState(null);
-  
+
   // Real stats calculated from fetched data
   const [stats, setStats] = useState({
     total: 0,
@@ -45,11 +45,11 @@ const MyOrders = () => {
 
         const userId = user._id || user.id;
         const res = await axios.get(`/orders/find/${userId}`);
-        
+
         // Sort by newest first
         const sortedOrders = (res.data || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         setOrders(sortedOrders);
-        
+
         // Calculate real statistics
         const statsData = {
           total: sortedOrders.length,
@@ -58,7 +58,7 @@ const MyOrders = () => {
           totalSpent: sortedOrders.reduce((acc, curr) => acc + (curr.totalAmount || 0), 0)
         };
         setStats(statsData);
-        
+
       } catch (err) {
         console.error("Error fetching orders:", err);
       } finally {
@@ -85,7 +85,7 @@ const MyOrders = () => {
   };
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Delivered': return 'bg-green-100 text-green-700 border-green-200';
       case 'Shipped': return 'bg-purple-100 text-purple-700 border-purple-200';
       case 'Processing': return 'bg-blue-100 text-blue-700 border-blue-200';
@@ -95,7 +95,7 @@ const MyOrders = () => {
   };
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Delivered': return <CheckCircle size={16} />;
       case 'Shipped': return <Truck size={16} />;
       case 'Processing': return <Package size={16} />;
@@ -106,7 +106,7 @@ const MyOrders = () => {
 
   // Filter Logic
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       order._id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = statusFilter === 'all' || order.status === statusFilter;
     return matchesSearch && matchesFilter;
@@ -126,7 +126,7 @@ const MyOrders = () => {
 
   return (
     <div className="space-y-8 animate-fadeIn max-w-6xl mx-auto">
-      
+
       {/* 1. Header & Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-4 mb-2">
@@ -185,10 +185,10 @@ const MyOrders = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
+
         <div className="flex items-center gap-3 w-full md:w-auto">
           <Filter size={18} className="text-gray-500" />
-          <select 
+          <select
             className="px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-sm focus:outline-none cursor-pointer"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -217,18 +217,18 @@ const MyOrders = () => {
         ) : (
           filteredOrders.map((order) => (
             <div key={order._id} className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-              
+
               {/* Order Summary Header */}
-              <div className="p-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center cursor-pointer" onClick={() => toggleOrderExpansion(order._id)}>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+              <div className="p-6 flex flex-col md:flex-row gap-4 md:gap-6 justify-between items-start md:items-center cursor-pointer" onClick={() => toggleOrderExpansion(order._id)}>
+                <div className="flex-1 w-full">
+                  <div className="flex items-center justify-between md:justify-start gap-3 mb-2">
                     <span className="text-lg font-bold text-gray-900">#{order._id.slice(-6).toUpperCase()}</span>
                     <span className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1.5 ${getStatusColor(order.status)}`}>
                       {getStatusIcon(order.status)}
-                      {order.status}
+                      <span className="hidden sm:inline">{order.status}</span>
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                       <Calendar size={14} /> {formatDate(order.createdAt)}
                     </span>
@@ -238,9 +238,9 @@ const MyOrders = () => {
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-gray-900">{formatCurrency(order.totalAmount)}</p>
-                  <button className="text-sm text-jewel-gold font-medium flex items-center gap-1 ml-auto mt-1 hover:underline">
+                <div className="w-full md:w-auto flex flex-row md:flex-col items-center md:items-end justify-between gap-2 border-t md:border-t-0 border-gray-100 pt-4 md:pt-0 mt-2 md:mt-0">
+                  <p className="text-xl md:text-2xl font-bold text-gray-900">{formatCurrency(order.totalAmount)}</p>
+                  <button className="text-sm text-jewel-gold font-medium flex items-center gap-1 hover:underline">
                     {expandedOrder === order._id ? 'Hide Details' : 'View Details'}
                     {expandedOrder === order._id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   </button>
@@ -250,15 +250,15 @@ const MyOrders = () => {
               {/* Expanded Details */}
               {expandedOrder === order._id && (
                 <div className="border-t border-gray-100 bg-gray-50 p-6 animate-slideDown">
-                  
+
                   {/* Items List */}
                   <h4 className="font-semibold text-gray-900 mb-4">Items Ordered</h4>
                   <div className="space-y-3 mb-6">
                     {order.items?.map((item, idx) => (
                       <div key={idx} className="flex items-center gap-4 bg-white p-3 rounded-lg border border-gray-200">
-                        <img 
-                          src={item.image || 'https://via.placeholder.com/80'} 
-                          alt={item.name} 
+                        <img
+                          src={item.image || 'https://via.placeholder.com/80'}
+                          alt={item.name}
                           className="w-16 h-16 object-cover rounded-md bg-gray-100"
                         />
                         <div className="flex-1">
@@ -295,7 +295,7 @@ const MyOrders = () => {
 
                   {/* Tracking Button */}
                   <div className="mt-6 flex justify-end">
-                    <Link 
+                    <Link
                       to={`/user/track-order/${order._id}`}
                       className="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm font-medium"
                     >

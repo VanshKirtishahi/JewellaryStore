@@ -14,12 +14,6 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-            // Optional: Verify token with backend if you have a /me endpoint
-            // const res = await axios.get('/auth/me'); 
-            // setUser(res.data);
-            
-            // For now, decode token or just assume valid if exists (simplified)
-            // Ideally, store user data in localStorage too or fetch it
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 setUser(JSON.parse(storedUser));

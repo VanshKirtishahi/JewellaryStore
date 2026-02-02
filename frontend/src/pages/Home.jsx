@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { 
-  Search, 
-  Sparkles, 
-  Gem, 
-  Heart, 
-  Star, 
-  Truck, 
-  Shield, 
+import {
+  Search,
+  Sparkles,
+  Gem,
+  Heart,
+  Star,
+  Truck,
+  Shield,
   Award,
   ArrowRight,
   ChevronRight,
@@ -75,30 +75,30 @@ const Home = () => {
   ];
 
   const benefits = [
-    { 
-      icon: <Shield size={24} />, 
-      title: 'Certified Quality', 
+    {
+      icon: <Shield size={24} />,
+      title: 'Certified Quality',
       description: 'All diamonds GIA certified',
       color: 'text-jewel-gold',
       bgColor: 'bg-gradient-to-br from-jewel-gold/10 to-amber-500/5'
     },
-    { 
-      icon: <Truck size={24} />, 
-      title: 'Free Shipping', 
+    {
+      icon: <Truck size={24} />,
+      title: 'Free Shipping',
       description: 'On orders over $1,000',
       color: 'text-jewel-gold',
       bgColor: 'bg-gradient-to-br from-jewel-gold/10 to-amber-500/5'
     },
-    { 
-      icon: <Clock size={24} />, 
-      title: 'Lifetime Warranty', 
+    {
+      icon: <Clock size={24} />,
+      title: 'Lifetime Warranty',
       description: 'On all craftsmanship',
       color: 'text-jewel-gold',
       bgColor: 'bg-gradient-to-br from-jewel-gold/10 to-amber-500/5'
     },
-    { 
-      icon: <Users size={24} />, 
-      title: 'Expert Guidance', 
+    {
+      icon: <Users size={24} />,
+      title: 'Expert Guidance',
       description: 'Personal consultations',
       color: 'text-jewel-gold',
       bgColor: 'bg-gradient-to-br from-jewel-gold/10 to-amber-500/5'
@@ -106,24 +106,24 @@ const Home = () => {
   ];
 
   const testimonials = [
-    { 
-      name: 'Sarah M.', 
-      role: 'Engaged', 
-      text: 'The custom engagement ring exceeded all expectations. Truly magical!', 
+    {
+      name: 'Sarah M.',
+      role: 'Engaged',
+      text: 'The custom engagement ring exceeded all expectations. Truly magical!',
       rating: 5,
       image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
     },
-    { 
-      name: 'Michael T.', 
-      role: 'Anniversary Gift', 
-      text: 'Exceptional craftsmanship and outstanding customer service.', 
+    {
+      name: 'Michael T.',
+      role: 'Anniversary Gift',
+      text: 'Exceptional craftsmanship and outstanding customer service.',
       rating: 5,
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
     },
-    { 
-      name: 'Emma R.', 
-      role: 'Wedding Bands', 
-      text: 'Perfect timing and exquisite quality. Highly recommended!', 
+    {
+      name: 'Emma R.',
+      role: 'Wedding Bands',
+      text: 'Perfect timing and exquisite quality. Highly recommended!',
       rating: 5,
       image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
     },
@@ -145,14 +145,14 @@ const Home = () => {
       } catch (err) {
         console.error("Error fetching products:", err);
         // Fallback to empty array so the page still renders
-        setProducts([]); 
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, []);
-  
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -161,14 +161,14 @@ const Home = () => {
   }, []);
 
   const filteredProducts = products.filter(product => {
-    const matchesSearch = searchQuery === '' || 
+    const matchesSearch = searchQuery === '' ||
       product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = activeCategory === 'all' || 
+
+    const matchesCategory = activeCategory === 'all' ||
       product.category.toLowerCase() === activeCategory.toLowerCase();
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -183,10 +183,10 @@ const Home = () => {
 
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
-      <Star 
-        key={i} 
-        size={16} 
-        className={i < rating ? "text-jewel-gold fill-jewel-gold" : "text-gray-300"} 
+      <Star
+        key={i}
+        size={16}
+        className={i < rating ? "text-jewel-gold fill-jewel-gold" : "text-gray-300"}
       />
     ));
   };
@@ -195,15 +195,14 @@ const Home = () => {
     <div className="min-h-screen bg-jewel-cream">
       {/* Navbar */}
       <Navbar />
-      
+
       {/* Hero Carousel */}
       <div className="relative h-screen max-h-[800px] overflow-hidden pt-20">
         {heroSlides.map((slide, index) => (
           <div
             key={index}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              currentSlide === index ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`absolute inset-0 transition-opacity duration-1000 ${currentSlide === index ? 'opacity-100' : 'opacity-0'
+              }`}
           >
             <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradient} z-10`} />
             <img
@@ -215,23 +214,23 @@ const Home = () => {
             <div className="absolute inset-0 z-20 flex items-center">
               <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="max-w-2xl">
-                  <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
+                  <h1 className="text-3xl sm:text-5xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight">
                     {slide.title}
                   </h1>
-                  <p className="text-lg sm:text-xl lg:text-2xl text-gray-300 mb-10 max-w-lg">
+                  <p className="text-base sm:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-10 max-w-lg">
                     {slide.subtitle}
                   </p>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Link
                       to={slide.link}
-                      className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-jewel-gold to-amber-500 text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group"
+                      className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-jewel-gold to-amber-500 text-white rounded-xl font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group text-sm sm:text-base"
                     >
                       {slide.cta}
                       <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </Link>
                     <button
                       onClick={scrollToCollection}
-                      className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300"
+                      className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 rounded-xl font-semibold hover:bg-white/20 transition-all duration-300 text-sm sm:text-base"
                     >
                       Browse All
                     </button>
@@ -241,16 +240,15 @@ const Home = () => {
             </div>
           </div>
         ))}
-        
+
         {/* Slide Indicators */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex gap-2">
           {heroSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                currentSlide === index ? 'bg-jewel-gold w-8' : 'bg-white/50 hover:bg-white'
-              }`}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-jewel-gold w-8' : 'bg-white/50 hover:bg-white'
+                }`}
             />
           ))}
         </div>
@@ -266,16 +264,14 @@ const Home = () => {
 
       {/* Search Bar */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-40">
-        <form 
+        <form
           onSubmit={handleSearch}
-          className={`max-w-4xl mx-auto transition-all duration-500 ${
-            isSearchFocused ? 'scale-105' : ''
-          }`}
+          className={`max-w-4xl mx-auto transition-all duration-500 ${isSearchFocused ? 'scale-105' : ''
+            }`}
         >
           <div className="relative">
-            <Search className={`absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${
-              isSearchFocused ? 'text-jewel-gold' : 'text-gray-400'
-            }`} size={20} />
+            <Search className={`absolute left-4 sm:left-6 top-1/2 transform -translate-y-1/2 transition-colors duration-300 ${isSearchFocused ? 'text-jewel-gold' : 'text-gray-400'
+              }`} size={20} />
             <input
               type="text"
               value={searchQuery}
@@ -294,7 +290,7 @@ const Home = () => {
               <span className="hidden sm:inline">Filters</span>
             </button>
           </div>
-          
+
           {/* Advanced Filters */}
           {showFilters && (
             <div className="mt-4 bg-white rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6 animate-slideDown">
@@ -312,15 +308,14 @@ const Home = () => {
                   <button
                     key={category.id}
                     onClick={() => setActiveCategory(category.id)}
-                    className={`shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                      activeCategory === category.id
-                        ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
+                    className={`shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${activeCategory === category.id
+                      ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
                   >
                     {category.icon}
                     <span className="hidden sm:inline">{category.label}</span>
-                    <span className="sm:hidden">{category.label.split(' ')[0]}</span>
+                    <span className="sm:hidden text-xs">{category.label.split(' ')[0]}</span>
                   </button>
                 ))}
               </div>
@@ -341,18 +336,17 @@ const Home = () => {
                 {filteredProducts.length} stunning piece{filteredProducts.length !== 1 ? 's' : ''} found
               </p>
             </div>
-            
+
             {/* Category Filter */}
             <div className="flex overflow-x-auto gap-2 pb-2">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}
-                  className={`shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap ${
-                    activeCategory === category.id
-                      ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                  className={`shrink-0 flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full transition-all duration-300 whitespace-nowrap ${activeCategory === category.id
+                    ? `bg-gradient-to-r ${category.color} text-white shadow-lg`
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
                 >
                   {category.icon}
                   <span className="hidden sm:inline">{category.label}</span>
@@ -395,7 +389,7 @@ const Home = () => {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         loading="lazy"
                       />
-                      
+
                       {/* Quick Actions */}
                       <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <button className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors duration-200">
@@ -405,7 +399,7 @@ const Home = () => {
                           <ShoppingBag size={16} className="text-gray-700 hover:text-jewel-gold" />
                         </button>
                       </div>
-                      
+
                       {/* Discount Badge */}
                       {product.discount > 0 && (
                         <div className="absolute top-3 left-3">
@@ -446,7 +440,7 @@ const Home = () => {
                             {product.discount > 0 && (
                               <div className="flex items-center gap-2">
                                 <span className="text-sm text-red-500 line-through">
-                                  ₹{(product.price / (1 - product.discount/100)).toLocaleString('en-IN')}
+                                  ₹{(product.price / (1 - product.discount / 100)).toLocaleString('en-IN')}
                                 </span>
                               </div>
                             )}
@@ -481,7 +475,7 @@ const Home = () => {
               <p className="text-gray-600">+1 (555) 123-4567</p>
               <p className="text-gray-600 text-sm">Mon-Sat: 9AM-6PM</p>
             </div>
-            
+
             <div className="text-center md:text-left">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-jewel-gold to-amber-500 rounded-xl mb-4">
                 <Mail className="text-white" size={24} />
@@ -490,7 +484,7 @@ const Home = () => {
               <p className="text-gray-600">contact@venkateshwarajewelry.com</p>
               <p className="text-gray-600 text-sm">Response within 24 hours</p>
             </div>
-            
+
             <div className="text-center md:text-left">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-jewel-gold to-amber-500 rounded-xl mb-4">
                 <MapPin className="text-white" size={24} />

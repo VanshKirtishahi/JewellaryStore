@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import { Link } from 'react-router-dom';
-import { 
-  Search, 
-  Filter, 
-  ChevronDown, 
-  ShoppingCart, 
-  Heart, 
+import {
+  Search,
+  Filter,
+  ChevronDown,
+  ShoppingCart,
+  Heart,
   Eye,
   Gem
 } from 'lucide-react';
@@ -44,7 +44,7 @@ const Collections = () => {
 
     // 1. Search
     if (searchQuery) {
-      result = result.filter(p => 
+      result = result.filter(p =>
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.category.toLowerCase().includes(searchQuery.toLowerCase())
       );
@@ -100,7 +100,7 @@ const Collections = () => {
         <div className="container mx-auto px-6 py-12 text-center">
           <h1 className="text-4xl font-serif font-bold text-gray-900 mb-4">Our Collections</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Explore our curated selection of fine jewelry, crafted with precision and passion. 
+            Explore our curated selection of fine jewelry, crafted with precision and passion.
             From timeless classics to modern masterpieces.
           </p>
         </div>
@@ -109,13 +109,13 @@ const Collections = () => {
       <div className="container mx-auto px-6 py-8">
         {/* Filters Bar */}
         <div className="flex flex-col lg:flex-row gap-6 mb-8">
-          
+
           {/* Search */}
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-            <input 
-              type="text" 
-              placeholder="Search for rings, diamonds, gold..." 
+            <input
+              type="text"
+              placeholder="Search for rings, diamonds, gold..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-jewel-gold focus:border-transparent outline-none shadow-sm"
@@ -128,11 +128,10 @@ const Collections = () => {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`px-6 py-3 rounded-xl whitespace-nowrap font-medium transition-all ${
-                  activeCategory === cat 
-                    ? 'bg-jewel-gold text-white shadow-md' 
+                className={`px-6 py-3 rounded-xl whitespace-nowrap font-medium transition-all ${activeCategory === cat
+                    ? 'bg-jewel-gold text-white shadow-md'
                     : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -140,30 +139,30 @@ const Collections = () => {
           </div>
 
           {/* Sort & Filter Dropdowns */}
-          <div className="flex gap-3">
-            <div className="relative group">
-              <select 
+          <div className="grid grid-cols-2 sm:flex gap-3">
+            <div className="relative group w-full sm:w-auto">
+              <select
                 value={priceRange}
                 onChange={(e) => setPriceRange(e.target.value)}
-                className="appearance-none pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-jewel-gold cursor-pointer"
+                className="appearance-none w-full pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-jewel-gold cursor-pointer"
               >
-                <option value="all">All Prices</option>
-                <option value="under-500">Under ₹500</option>
-                <option value="500-1000">₹500 - ₹1,000</option>
-                <option value="1000-plus">₹1,000+</option>
+                <option value="all">Price: All</option>
+                <option value="under-500">&lt; ₹500</option>
+                <option value="500-1000">₹500-1k</option>
+                <option value="1000-plus">₹1k+</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
             </div>
 
-            <div className="relative group">
-              <select 
+            <div className="relative group w-full sm:w-auto">
+              <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-jewel-gold cursor-pointer"
+                className="appearance-none w-full pl-4 pr-10 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-jewel-gold cursor-pointer"
               >
-                <option value="newest">Newest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
+                <option value="newest">Newest</option>
+                <option value="price-low">Low-High</option>
+                <option value="price-high">High-Low</option>
               </select>
               <Filter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
             </div>
@@ -176,8 +175,8 @@ const Collections = () => {
             <Gem className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900">No items found</h3>
             <p className="text-gray-500">Try adjusting your search or filters.</p>
-            <button 
-              onClick={() => {setSearchQuery(''); setActiveCategory('All'); setPriceRange('all');}}
+            <button
+              onClick={() => { setSearchQuery(''); setActiveCategory('All'); setPriceRange('all'); }}
               className="mt-4 text-jewel-gold font-medium hover:underline"
             >
               Clear all filters
@@ -189,22 +188,22 @@ const Collections = () => {
               <div key={product._id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden bg-gray-100">
-                  <img 
-                    src={product.images?.[0] || 'https://via.placeholder.com/400'} 
+                  <img
+                    src={product.images?.[0] || 'https://via.placeholder.com/400'}
                     alt={product.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
-                  
+
                   {/* Overlay Actions */}
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
-                    <Link 
+                    <Link
                       to={`/product/${product._id}`}
                       className="p-3 bg-white text-gray-900 rounded-full hover:bg-jewel-gold hover:text-white transition-colors transform hover:scale-110"
                       title="View Details"
                     >
                       <Eye size={20} />
                     </Link>
-                    <button 
+                    <button
                       className="p-3 bg-white text-gray-900 rounded-full hover:bg-jewel-gold hover:text-white transition-colors transform hover:scale-110"
                       title="Add to Wishlist"
                     >
@@ -228,7 +227,7 @@ const Collections = () => {
                     <span className="text-lg font-serif font-bold text-jewel-gold">
                       {formatCurrency(product.price)}
                     </span>
-                    <Link 
+                    <Link
                       to={`/product/${product._id}`}
                       className="text-sm font-medium text-gray-600 hover:text-jewel-gold transition-colors"
                     >

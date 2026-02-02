@@ -2,12 +2,12 @@ import { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from '../api/axios';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  Crown, 
+import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Crown,
   ArrowRight,
   Loader2,
   AlertCircle,
@@ -16,16 +16,16 @@ import {
 } from 'lucide-react';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ 
-    email: '', 
-    password: '' 
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -59,12 +59,12 @@ const Login = () => {
         email: formData.email,
         password: formData.password
       });
-      
+
       // Pass token and user data to context
       login(res.data.token, res.data.user);
-      
+
       setSuccess('Login successful! Redirecting...');
-      
+
       // Handle Remember Me logic on the client side if needed
       if (rememberMe) {
         localStorage.setItem('rememberUser', formData.email);
@@ -80,14 +80,14 @@ const Login = () => {
           navigate(from, { replace: true });
         }
       }, 1000);
-      
+
     } catch (err) {
       console.error("Login Error:", err); // Log full error for debugging
-      const errorMessage = err.response?.data?.message || 
-                           err.response?.data?.error || 
-                           'Invalid email or password';
+      const errorMessage = err.response?.data?.message ||
+        err.response?.data?.error ||
+        'Invalid email or password';
       setError(errorMessage);
-      
+
       if (err.response?.status === 401 || err.response?.status === 400) {
         setFormData(prev => ({ ...prev, password: '' }));
       }
@@ -101,7 +101,7 @@ const Login = () => {
       <div className="w-full max-w-md">
         {/* Login Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome Back</h1>
             <p className="text-gray-500 mb-8">Please sign in to access your account.</p>
 
@@ -112,7 +112,7 @@ const Login = () => {
                 <span>{error}</span>
               </div>
             )}
-            
+
             {success && (
               <div className="mb-6 p-4 bg-green-50 border border-green-100 text-green-600 rounded-xl flex items-start gap-3 text-sm animate-fade-in">
                 <CheckCircle className="shrink-0 mt-0.5" size={18} />
@@ -201,7 +201,7 @@ const Login = () => {
               </button>
             </form>
           </div>
-          
+
           {/* Footer Area */}
           <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-600">
@@ -217,7 +217,7 @@ const Login = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Simple styling for fade-in animation */}
       <style>{`
         @keyframes fadeIn {

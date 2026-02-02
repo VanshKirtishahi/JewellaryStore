@@ -79,7 +79,7 @@ const Register = () => {
       };
 
       const res = await axios.post('/auth/register', registrationData);
-      
+
       // SAFETY CHECK: Only login if the backend actually sent a token
       if (res.data.token) {
         login(res.data.token, res.data.user);
@@ -88,25 +88,25 @@ const Register = () => {
         // No token returned? Just redirect to login page.
         setSuccess('Account created successfully! Please log in.');
       }
-      
+
       // Redirect
       setTimeout(() => {
         // If we have a token, go to dashboard/home, otherwise go to login
         const nextPath = res.data.token ? from : '/login';
-        
-        navigate(nextPath, { 
+
+        navigate(nextPath, {
           replace: true,
-          state: { 
-            welcomeMessage: 'Welcome to Venkateshwara Fine Jewelry!' 
+          state: {
+            welcomeMessage: 'Welcome to Venkateshwara Fine Jewelry!'
           }
         });
       }, 1500);
-      
+
     } catch (err) {
       console.error("Registration Error:", err);
-      const errorMessage = err.response?.data?.message || 
-                           err.response?.data?.error || 
-                           'Registration failed. Please try again.';
+      const errorMessage = err.response?.data?.message ||
+        err.response?.data?.error ||
+        'Registration failed. Please try again.';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -118,7 +118,7 @@ const Register = () => {
       <div className="w-full max-w-lg pt-20">
         {/* Register Card */}
         <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Create Account</h1>
             <p className="text-gray-500 mb-8">Fill in your details to get started.</p>
 
