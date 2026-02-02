@@ -6,7 +6,7 @@ import {
 import { useState, useContext, useEffect } from 'react';
 // FIX: Correct import path
 import { AuthContext } from '../../context/AuthContext';
-import vkLogo from '../assets/VK-Logo.png';
+import vkLogo from '../../assets/VK-Logo.png';
 
 const AdminLayout = () => {
   const { logout, user } = useContext(AuthContext);

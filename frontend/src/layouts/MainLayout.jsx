@@ -146,7 +146,7 @@ const MainLayout = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-serif font-bold">Venkateshwara</h3>
-                  <p className="text-sm text-gray-400">Fine Jewelry Since 1985</p>
+                  <p className="text-sm text-gray-400">Enterprises</p>
                 </div>
               </div>
               
@@ -247,7 +247,7 @@ const MainLayout = () => {
           <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-2 text-gray-500 text-sm">
-                <span>© {new Date().getFullYear()} Venkateshwara Jewellers</span>
+                <span>© {new Date().getFullYear()} Venkateshwara Enterprises</span>
                 <span className="hidden sm:inline">•</span>
                 <span className="hidden sm:inline">All rights reserved</span>
               </div>
