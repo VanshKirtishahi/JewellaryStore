@@ -178,7 +178,7 @@ const UserLayout = () => {
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-100">
           <Link to="/" className={`flex items-center gap-2 group ${!isSidebarOpen && !isMobile && 'justify-center w-full'}`}>
             <div className="w-8 h-8 flex items-center justify-center text-white font-serif group-hover:scale-105 transition-transform shrink-0">
-                <img src={vkLogo} alt="logo" className="w-full h-full object-contain" />
+                <img src={vkLogo} alt="logo"/>
               </div>
             {(isSidebarOpen || isMobile) && (
               <span className="font-serif font-bold text-gray-900 text-lg tracking-wide whitespace-nowrap opacity-100 transition-opacity">
