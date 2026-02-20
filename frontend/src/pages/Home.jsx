@@ -53,7 +53,7 @@ const Home = () => {
       title: 'Diamond Collection',
       subtitle: 'Eternal Brilliance, Timeless Beauty',
       cta: 'Explore Diamonds',
-      link: '/collections/diamonds',
+      link: '/collections',
       gradient: 'from-jewel-dark/80 via-jewel-dark/60 to-transparent'
     },
     {
@@ -69,7 +69,7 @@ const Home = () => {
       title: 'Gold Elegance',
       subtitle: 'Pure Luxury, Handcrafted Excellence',
       cta: 'View Gold Collection',
-      link: '/collections/gold',
+      link: '/collections',
       gradient: 'from-jewel-dark/80 via-jewel-dark/60 to-transparent'
     }
   ];
