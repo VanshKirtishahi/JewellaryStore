@@ -16,8 +16,7 @@ import {
   X,
   MapPin,
   Phone,
-  Mail,
-  CreditCard
+  Mail
 } from 'lucide-react';
 
 const AdminDashboard = () => {
@@ -45,7 +44,7 @@ const AdminDashboard = () => {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   const formatDate = (dateString) => {
@@ -74,27 +73,26 @@ const AdminDashboard = () => {
 
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
+      // Pass high limit to bypass backend pagination for accurate aggregate stats
       const [productsRes, ordersRes, usersRes] = await Promise.all([
-        axios.get('/products', config),
-        axios.get('/orders', config),
-        axios.get('/users?role=user', config)
+        axios.get('/products?limit=5000', config),
+        axios.get('/orders?limit=5000', config),
+        axios.get('/users?role=user&limit=5000', config)
       ]);
 
-      const products = productsRes.data || [];
-      const users = usersRes.data || [];
+      const products = productsRes?.data?.products || productsRes?.data || [];
+      const users = usersRes?.data || [];
 
-      // --- FIX: Handle Paginated Response vs Array Response ---
+      // Extract Orders safely
       let orders = [];
-      if (ordersRes.data.orders && Array.isArray(ordersRes.data.orders)) {
-        orders = ordersRes.data.orders; // Extract from pagination object
-      } else if (Array.isArray(ordersRes.data)) {
-        orders = ordersRes.data; // Fallback for simple array
+      if (ordersRes?.data?.orders && Array.isArray(ordersRes?.data?.orders)) {
+        orders = ordersRes?.data?.orders;
+      } else if (Array.isArray(ordersRes?.data)) {
+        orders = ordersRes?.data;
       }
 
-      // --- Calculations (Simplified for brevity) ---
-      const totalRevenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      const totalRevenue = orders?.reduce((sum, order) => sum + (order?.totalAmount || 0), 0);
       
-      // Calculate changes (Mock logic for now, you can refine this based on real month data)
       const revenueChange = 12.5; 
       const ordersChange = 8.2;
       const productsChange = 5.0;
@@ -102,18 +100,18 @@ const AdminDashboard = () => {
 
       setStats({
         revenue: totalRevenue, revenueChange, isRevenueUp: true,
-        orders: orders.length, ordersChange, isOrdersUp: true,
-        products: products.length, productsChange, isProductsUp: true,
-        customers: users.length, customersChange, isCustomersUp: true,
+        orders: orders?.length || 0, ordersChange, isOrdersUp: true,
+        products: products?.length || 0, productsChange, isProductsUp: true,
+        customers: users?.length || 0, customersChange, isCustomersUp: true,
       });
 
       // Sort Recent Orders
-      const sortedOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const sortedOrders = [...orders].sort((a, b) => new Date(b?.createdAt) - new Date(a?.createdAt));
       setRecentOrders(sortedOrders.slice(0, 5));
 
     } catch (err) {
       console.error("Error loading dashboard data:", err);
-      setError(err.message || "Failed to load dashboard data");
+      setError(err?.message || "Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
@@ -123,13 +121,11 @@ const AdminDashboard = () => {
     fetchData();
   }, [user]);
 
-  // Handle View Details
   const handleViewOrder = (order) => {
     setSelectedOrder(order);
     setShowModal(true);
   };
 
-  // Status Badge Helper
   const getStatusBadge = (status) => {
     switch (status) {
       case 'Delivered': return 'bg-green-100 text-green-800';
@@ -141,13 +137,13 @@ const AdminDashboard = () => {
   };
 
   const statCards = [
-    { label: 'Total Revenue', value: formatCurrency(stats.revenue), icon: DollarSign, color: 'blue', change: `${stats.revenueChange}%`, isUp: stats.isRevenueUp },
-    { label: 'Total Orders', value: stats.orders, icon: ShoppingBag, color: 'emerald', change: `${stats.ordersChange}%`, isUp: stats.isOrdersUp },
-    { label: 'Total Products', value: stats.products, icon: Package, color: 'amber', change: `${stats.productsChange}%`, isUp: stats.isProductsUp },
-    { label: 'Total Customers', value: stats.customers, icon: Users, color: 'purple', change: `${stats.customersChange}%`, isUp: stats.isCustomersUp },
+    { label: 'Total Revenue', value: formatCurrency(stats?.revenue), icon: DollarSign, color: 'blue', change: `${stats?.revenueChange}%`, isUp: stats?.isRevenueUp },
+    { label: 'Total Orders', value: stats?.orders, icon: ShoppingBag, color: 'emerald', change: `${stats?.ordersChange}%`, isUp: stats?.isOrdersUp },
+    { label: 'Total Products', value: stats?.products, icon: Package, color: 'amber', change: `${stats?.productsChange}%`, isUp: stats?.isProductsUp },
+    { label: 'Total Customers', value: stats?.customers, icon: Users, color: 'purple', change: `${stats?.customersChange}%`, isUp: stats?.isCustomersUp },
   ];
 
-  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jewel-gold"></div></div>;
+  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div></div>;
   if (error) return <div className="p-8 text-center"><p className="text-red-500 mb-4">{error}</p><button onClick={fetchData} className="px-4 py-2 bg-blue-600 text-white rounded-lg">Retry</button></div>;
 
   return (
@@ -168,18 +164,18 @@ const AdminDashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat, index) => {
-          const Icon = stat.icon;
+        {statCards?.map((stat, index) => {
+          const Icon = stat?.icon;
           const colors = { blue: 'text-blue-600 bg-blue-50', emerald: 'text-emerald-600 bg-emerald-50', amber: 'text-amber-600 bg-amber-50', purple: 'text-purple-600 bg-purple-50' };
           return (
             <div key={index} className="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
               <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-lg ${colors[stat.color]}`}><Icon size={24} /></div>
-                <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${stat.isUp ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                  {stat.isUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {stat.change}
+                <div className={`p-3 rounded-lg ${colors[stat?.color]}`}><Icon size={24} /></div>
+                <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${stat?.isUp ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                  {stat?.isUp ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />} {stat?.change}
                 </div>
               </div>
-              <div><p className="text-sm font-medium text-gray-500">{stat.label}</p><h3 className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</h3></div>
+              <div><p className="text-sm font-medium text-gray-500">{stat?.label}</p><h3 className="text-2xl font-bold text-gray-900 mt-1">{stat?.value}</h3></div>
             </div>
           );
         })}
@@ -205,30 +201,28 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {recentOrders.length === 0 ? (
+              {recentOrders?.length === 0 ? (
                 <tr><td colSpan="6" className="px-6 py-12 text-center text-gray-500"><ShoppingBag className="w-12 h-12 text-gray-200 mx-auto mb-3" /><p>No orders found yet.</p></td></tr>
               ) : (
-                recentOrders.map((order) => (
-                  <tr key={order._id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">#{order._id?.slice(-6).toUpperCase()}</td>
+                recentOrders?.map((order) => (
+                  <tr key={order?._id} className="even:bg-white odd:bg-slate-50 hover:bg-blue-50/50 transition-colors">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">#{order?._id?.slice(-6).toUpperCase()}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
-                            {/* HANDLE BOTH USER AND GUEST NAME */}
-                            {(order.userId?.name || order.guestDetails?.name || 'G')[0]?.toUpperCase()}
+                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-700 shadow-sm">
+                            {(order?.userId?.name || order?.guestDetails?.name || 'G')[0]?.toUpperCase()}
                         </div>
                         <div>
-                            {/* HANDLE BOTH USER AND GUEST NAME */}
-                            <p className="text-sm font-medium text-gray-900">{order.userId?.name || order.guestDetails?.name || 'Guest'}</p>
-                            <p className="text-xs text-gray-500">{order.userId?.email || order.guestDetails?.email || 'N/A'}</p>
+                            <p className="text-sm font-medium text-gray-900">{order?.userId?.name || order?.guestDetails?.name || 'Guest'}</p>
+                            <p className="text-xs text-gray-500">{order?.userId?.email || order?.guestDetails?.email || 'N/A'}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500"><div className="flex items-center gap-2"><Clock size={14} />{formatDate(order.createdAt)}</div></td>
-                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">{formatCurrency(order.totalAmount)}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500"><div className="flex items-center gap-2"><Clock size={14} />{formatDate(order?.createdAt)}</div></td>
+                    <td className="px-6 py-4 text-sm font-semibold text-gray-900">{formatCurrency(order?.totalAmount)}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(order.status)}`}>
-                        {order.status || 'Pending'}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(order?.status)}`}>
+                        {order?.status || 'Pending'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -253,7 +247,6 @@ const AdminDashboard = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
             
-            {/* Modal Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
@@ -261,72 +254,65 @@ const AdminDashboard = () => {
                 </div>
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">Order Details</h3>
-                  <p className="text-sm text-gray-500 font-mono">#{selectedOrder._id}</p>
+                  <p className="text-sm text-gray-500 font-mono">#{selectedOrder?._id}</p>
                 </div>
               </div>
               <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size={20} className="text-gray-500" /></button>
             </div>
 
-            {/* Modal Content */}
             <div className="p-6 overflow-y-auto flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 
-                {/* Customer Info */}
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><Users size={16} /> Customer Info</h4>
                   <div className="space-y-2 text-sm text-gray-600">
                     <p className="flex items-center gap-2">
-                        <Users size={14} /> {selectedOrder.userId?.name || selectedOrder.guestDetails?.name || 'Guest'}
+                        <Users size={14} /> {selectedOrder?.userId?.name || selectedOrder?.guestDetails?.name || 'Guest'}
                     </p>
                     <p className="flex items-center gap-2">
-                        <Mail size={14} /> {selectedOrder.userId?.email || selectedOrder.guestDetails?.email || 'N/A'}
+                        <Mail size={14} /> {selectedOrder?.userId?.email || selectedOrder?.guestDetails?.email || 'N/A'}
                     </p>
-                    <p className="flex items-center gap-2"><Clock size={14} /> {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                    <p className="flex items-center gap-2"><Clock size={14} /> {new Date(selectedOrder?.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
 
-                {/* Shipping Info */}
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2"><MapPin size={16} /> Delivery Details</h4>
                   <div className="space-y-2 text-sm text-gray-600">
-                    <p className="flex items-start gap-2"><MapPin size={14} className="mt-0.5 shrink-0" /> {selectedOrder.shippingAddress || 'No address provided'}</p>
-                    {/* Handle Guest Phone or User Phone */}
+                    <p className="flex items-start gap-2"><MapPin size={14} className="mt-0.5 shrink-0" /> {selectedOrder?.shippingAddress || 'No address provided'}</p>
                     <p className="flex items-center gap-2">
-                        <Phone size={14} /> {selectedOrder.userId?.phone || selectedOrder.guestDetails?.phone || 'N/A'}
+                        <Phone size={14} /> {selectedOrder?.userId?.phone || selectedOrder?.guestDetails?.phone || 'N/A'}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Items List */}
-              <h4 className="font-semibold text-gray-900 mb-4">Order Items ({selectedOrder.products?.length || 0})</h4>
+              <h4 className="font-semibold text-gray-900 mb-4">Order Items ({selectedOrder?.products?.length || 0})</h4>
               <div className="space-y-3">
-                {selectedOrder.products?.map((item, idx) => (
+                {selectedOrder?.products?.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-4 p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
-                    {/* Fixed Image Logic */}
                     <img 
-                      src={item.productId?.img || item.productId?.image || 'https://via.placeholder.com/80'} 
-                      alt={item.title || item.productId?.title} 
+                      src={item?.productId?.img || item?.productId?.image || item?.productId?.images?.[0] || 'https://via.placeholder.com/80'} 
+                      alt={item?.title || item?.productId?.title} 
                       className="w-16 h-16 object-cover rounded-lg bg-gray-200"
                     />
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900">{item.title || item.productId?.title}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                      <p className="font-medium text-gray-900">{item?.title || item?.productId?.title}</p>
+                      <p className="text-sm text-gray-500">Qty: {item?.quantity}</p>
                     </div>
-                    <p className="font-semibold text-gray-900">{formatCurrency(item.price * item.quantity)}</p>
+                    <p className="font-semibold text-gray-900">{formatCurrency((item?.price || 0) * (item?.quantity || 1))}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
               <div>
                 <p className="text-sm text-gray-500">Total Amount</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(selectedOrder.totalAmount)}</p>
+                <p className="text-2xl font-bold text-gray-900">{formatCurrency(selectedOrder?.totalAmount)}</p>
               </div>
-              <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusBadge(selectedOrder.status)}`}>
-                {selectedOrder.status}
+              <span className={`px-4 py-2 rounded-full text-sm font-medium ${getStatusBadge(selectedOrder?.status)}`}>
+                {selectedOrder?.status}
               </span>
             </div>
           </div>
