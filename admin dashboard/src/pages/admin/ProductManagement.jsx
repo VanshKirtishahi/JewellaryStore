@@ -42,7 +42,7 @@ const ProductManagement = () => {
   // Filter logic
   useEffect(() => {
     if(searchQuery) {
-        setFilteredProducts(products.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase())));
+        setFilteredProducts(products?.filter(p => p?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase())));
     } else {
         setFilteredProducts(products);
     }
@@ -51,7 +51,7 @@ const ProductManagement = () => {
   const fetchProducts = async () => {
     try {
       const res = await axios.get('/products');
-      setProducts(res.data);
+      setProducts(res?.data || []);
       setLoading(false);
     } catch (err) {
       console.error(err);
@@ -62,10 +62,10 @@ const ProductManagement = () => {
   const fetchAttributes = async () => {
     try {
       const res = await axios.get('/attributes');
-      const allAttrs = res.data;
+      const allAttrs = res?.data || [];
       
-      const dbCategories = allAttrs.filter(a => a.type === 'category').map(a => a.name);
-      const dbMaterials = allAttrs.filter(a => a.type === 'material').map(a => a.name);
+      const dbCategories = allAttrs?.filter(a => a?.type === 'category')?.map(a => a?.name);
+      const dbMaterials = allAttrs?.filter(a => a?.type === 'material')?.map(a => a?.name);
 
       // Merge defaults with DB values (remove duplicates)
       setCategories(prev => [...new Set([...prev, ...dbCategories])]);
@@ -78,7 +78,7 @@ const ProductManagement = () => {
   // --- ATTRIBUTE HANDLERS ---
   const handleAddAttribute = async (e) => {
     e.preventDefault();
-    if (!newAttributeName.trim()) return;
+    if (!newAttributeName?.trim()) return;
 
     try {
       await axios.post('/attributes', {
@@ -97,7 +97,7 @@ const ProductManagement = () => {
 
       closeAttributeModal();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to add.");
+      alert(err?.response?.data?.message || "Failed to add.");
     }
   };
 
@@ -113,7 +113,7 @@ const ProductManagement = () => {
 
   // --- PRODUCT FORM HANDLERS ---
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       setNewProduct({ ...newProduct, imageFile: file });
       setImagePreview(URL.createObjectURL(file));
@@ -126,33 +126,33 @@ const ProductManagement = () => {
 
     try {
         const formData = new FormData();
-        formData.append('title', newProduct.title);
-        formData.append('description', newProduct.description || '');
-        formData.append('category', newProduct.category);
-        formData.append('material', newProduct.material || '');
+        formData.append('title', newProduct?.title);
+        formData.append('description', newProduct?.description || '');
+        formData.append('category', newProduct?.category);
+        formData.append('material', newProduct?.material || '');
         
         // Ensure numbers
-        formData.append('price', Number(newProduct.price) || 0); 
-        formData.append('stock', Number(newProduct.stock) || 0);
-        formData.append('weight', Number(newProduct.weight) || 0);
-        formData.append('discount', Number(newProduct.discount) || 0);
-        formData.append('featured', newProduct.featured);
+        formData.append('price', Number(newProduct?.price) || 0); 
+        formData.append('stock', Number(newProduct?.stock) || 0);
+        formData.append('weight', Number(newProduct?.weight) || 0);
+        formData.append('discount', Number(newProduct?.discount) || 0);
+        formData.append('featured', newProduct?.featured);
 
         // Handle Image
-        if (newProduct.imageFile) {
+        if (newProduct?.imageFile) {
             formData.append('image', newProduct.imageFile);
-        } else if (newProduct.image) {
+        } else if (newProduct?.image) {
             formData.append('image', newProduct.image);
         }
 
         let res;
         if(editingProduct) {
-            res = await axios.put(`/products/${editingProduct._id}`, formData);
-            setProducts(products.map(p => p._id === editingProduct._id ? res.data : p));
+            res = await axios.put(`/products/${editingProduct?._id}`, formData);
+            setProducts(products?.map(p => p?._id === editingProduct?._id ? res?.data : p));
             alert("Product Updated Successfully!");
         } else {
             res = await axios.post('/products', formData);
-            setProducts([res.data, ...products]);
+            setProducts([res?.data, ...products]);
             alert("Product Created Successfully!");
         }
         
@@ -168,19 +168,19 @@ const ProductManagement = () => {
   const handleEdit = (product) => {
     setEditingProduct(product);
     setNewProduct({
-        title: product.title,
-        description: product.description,
-        price: product.price,
-        category: product.category,
-        material: product.material,
-        stock: product.stock,
-        weight: product.weight,
-        discount: product.discount,
-        featured: product.featured,
-        image: product.images?.[0] || '',
+        title: product?.title,
+        description: product?.description,
+        price: product?.price,
+        category: product?.category,
+        material: product?.material,
+        stock: product?.stock,
+        weight: product?.weight,
+        discount: product?.discount,
+        featured: product?.featured,
+        image: product?.images?.[0] || '',
         imageFile: null
     });
-    setImagePreview(product.images?.[0] || '');
+    setImagePreview(product?.images?.[0] || '');
     setIsAddingProduct(true);
   };
 
@@ -188,7 +188,7 @@ const ProductManagement = () => {
     if(window.confirm("Are you sure?")) {
         try {
             await axios.delete(`/products/${id}`);
-            setProducts(products.filter(p => p._id !== id));
+            setProducts(products?.filter(p => p?._id !== id));
         } catch(err) { alert("Delete failed"); }
     }
   };
@@ -228,22 +228,22 @@ const ProductManagement = () => {
         <div className="flex justify-center p-12"><Loader2 className="animate-spin" /></div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredProducts.map(p => (
-            <div key={p._id} className="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+            {filteredProducts?.map(p => (
+            <div key={p?._id} className="bg-white border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
                 <div className="h-48 bg-gray-100 relative">
-                    <img src={p.images?.[0]} alt={p.title} className="w-full h-full object-cover" />
+                    <img src={p?.images?.[0]} alt={p?.title} className="w-full h-full object-cover" />
                     <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => handleEdit(p)} className="p-2 bg-white rounded-full shadow hover:bg-gray-50"><Edit size={16}/></button>
-                        <button onClick={() => handleDelete(p._id)} className="p-2 bg-white rounded-full shadow hover:text-red-500"><Trash2 size={16}/></button>
+                        <button onClick={() => handleDelete(p?._id)} className="p-2 bg-white rounded-full shadow hover:text-red-500"><Trash2 size={16}/></button>
                     </div>
                 </div>
                 <div className="p-4">
-                    <h3 className="font-bold text-gray-800 truncate">{p.title}</h3>
-                    <p className="text-sm text-gray-500 mb-2">{p.category} • {p.material}</p>
+                    <h3 className="font-bold text-gray-800 truncate">{p?.title}</h3>
+                    <p className="text-sm text-gray-500 mb-2">{p?.category} • {p?.material}</p>
                     <div className="flex justify-between items-center">
-                        <span className="font-bold">₹{p.price}</span>
-                        <span className={`text-xs px-2 py-1 rounded-full ${p.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                            {p.stock > 0 ? `${p.stock} in stock` : 'Out of stock'}
+                        <span className="font-bold">{p?.weight ? `${p.weight}g` : 'N/A'}</span>
+                        <span className={`text-xs px-2 py-1 rounded-full ${p?.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {p?.stock > 0 ? `${p.stock} in stock` : 'Out of stock'}
                         </span>
                     </div>
                 </div>
@@ -282,28 +282,41 @@ const ProductManagement = () => {
 
               {/* RIGHT: DETAILS */}
               <div className="space-y-4">
-                <input placeholder="Product Title *" className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
-                  value={newProduct.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} required />
+                
+                {/* Product Title Field */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1 block">Product Title *</label>
+                  <input placeholder="Enter product title..." className="w-full border p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                    value={newProduct?.title} onChange={e => setNewProduct({...newProduct, title: e.target.value})} required />
+                </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                    <input type="number" placeholder="Price (₹) *" className="border p-2.5 rounded-lg w-full" 
-                        value={newProduct.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} required />
-                    <input type="number" placeholder="Stock Qty *" className="border p-2.5 rounded-lg w-full" 
-                        value={newProduct.stock} onChange={e => setNewProduct({...newProduct, stock: e.target.value})} required />
+                    {/* Price Field */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Price (₹) *</label>
+                        <input type="number" placeholder="0" className="border p-2.5 rounded-lg w-full outline-none focus:ring-2 focus:ring-blue-500" 
+                            value={newProduct?.price} onChange={e => setNewProduct({...newProduct, price: e.target.value})} required />
+                    </div>
+                    {/* Stock Field */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Stock Qty *</label>
+                        <input type="number" placeholder="0" className="border p-2.5 rounded-lg w-full outline-none focus:ring-2 focus:ring-blue-500" 
+                            value={newProduct?.stock} onChange={e => setNewProduct({...newProduct, stock: e.target.value})} required />
+                    </div>
                 </div>
 
-                {/* CATEGORY + ADD BUTTON */}
+                {/* Category Field */}
                 <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Category *</label>
                     <div className="flex gap-2">
                         <select 
-                            className="w-full border p-2.5 rounded-lg bg-white"
-                            value={newProduct.category} 
+                            className="w-full border p-2.5 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500"
+                            value={newProduct?.category} 
                             onChange={e => setNewProduct({...newProduct, category: e.target.value})}
                             required
                         >
                             <option value="">Select Category...</option>
-                            {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                            {categories?.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                         <button type="button" onClick={() => openAttributeModal('category')} className="bg-gray-100 px-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 border" title="Add New Category">
                             <Plus size={20} />
@@ -311,17 +324,17 @@ const ProductManagement = () => {
                     </div>
                 </div>
 
-                {/* MATERIAL + ADD BUTTON */}
+                {/* Material Field */}
                 <div>
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Material</label>
                     <div className="flex gap-2">
                         <select 
-                            className="w-full border p-2.5 rounded-lg bg-white"
-                            value={newProduct.material} 
+                            className="w-full border p-2.5 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500"
+                            value={newProduct?.material} 
                             onChange={e => setNewProduct({...newProduct, material: e.target.value})}
                         >
                             <option value="">Select Material...</option>
-                            {materials.map(m => <option key={m} value={m}>{m}</option>)}
+                            {materials?.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
                         <button type="button" onClick={() => openAttributeModal('material')} className="bg-gray-100 px-3 rounded-lg hover:bg-blue-50 hover:text-blue-600 border" title="Add New Material">
                             <Plus size={20} />
@@ -329,14 +342,26 @@ const ProductManagement = () => {
                     </div>
                 </div>
                 
-                <textarea rows="3" placeholder="Description" className="w-full border p-2.5 rounded-lg" 
-                    value={newProduct.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} />
+                {/* Description Field */}
+                <div>
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">Description</label>
+                    <textarea rows="3" placeholder="Enter product description..." className="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" 
+                        value={newProduct?.description} onChange={e => setNewProduct({...newProduct, description: e.target.value})} />
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <input type="number" placeholder="Weight (g)" className="border p-2.5 rounded-lg" 
-                        value={newProduct.weight} onChange={e => setNewProduct({...newProduct, weight: e.target.value})} />
-                    <input type="number" placeholder="Discount (%)" className="border p-2.5 rounded-lg" 
-                        value={newProduct.discount} onChange={e => setNewProduct({...newProduct, discount: e.target.value})} />
+                    {/* Weight Field */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Weight (g)</label>
+                        <input type="number" placeholder="0" className="border p-2.5 rounded-lg w-full outline-none focus:ring-2 focus:ring-blue-500" 
+                            value={newProduct?.weight} onChange={e => setNewProduct({...newProduct, weight: e.target.value})} />
+                    </div>
+                    {/* Discount Field */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Discount (%)</label>
+                        <input type="number" placeholder="0" className="border p-2.5 rounded-lg w-full outline-none focus:ring-2 focus:ring-blue-500" 
+                            value={newProduct?.discount} onChange={e => setNewProduct({...newProduct, discount: e.target.value})} />
+                    </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">

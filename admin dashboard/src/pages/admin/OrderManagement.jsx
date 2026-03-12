@@ -78,18 +78,24 @@ const OrderManagement = () => {
     }
   };
 
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get('/products?limit=1000');
+      setAvailableProducts(res?.data?.products || res?.data || []);
+    } catch (err) {
+      console.error("Failed to fetch products", err);
+    }
+  };
+
   useEffect(() => {
     fetchStats();
+    fetchProducts(); // Always fetch full inventory on load to cross-reference Mongoose data
   }, []);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => fetchOrders(), 500);
     return () => clearTimeout(timeoutId);
   }, [page, statusFilter, searchQuery, startDate, endDate]);
-
-  useEffect(() => {
-    if (showCreateModal) fetchProducts();
-  }, [showCreateModal]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -137,15 +143,6 @@ const OrderManagement = () => {
     }
   };
 
-  const fetchProducts = async () => {
-    try {
-      const res = await axios.get('/products?limit=1000');
-      setAvailableProducts(res?.data?.products || res?.data || []);
-    } catch (err) {
-      console.error("Failed to fetch products", err);
-    }
-  };
-
   const handleStatusUpdate = async (id, newStatus) => {
     try {
       await axios.put(`/orders/${id}`, { status: newStatus });
@@ -188,6 +185,35 @@ const OrderManagement = () => {
     return product?.image || product?.img || null;
   };
 
+  // OVERHAULED: Force merge Mongoose populated object with Full Inventory Data
+  const getPopulatedProduct = (item) => {
+    const idToFind = typeof item?.productId === 'string' ? item.productId : item?.productId?._id;
+    
+    let fullProduct = {};
+
+    // 1. If backend populated some fields (like title), keep them as a base
+    if (item?.productId && typeof item.productId === 'object') {
+      fullProduct = { ...item.productId };
+    }
+
+    // 2. Cross-reference with full inventory to forcefully inject missing category, material, and weight
+    if (idToFind && availableProducts?.length > 0) {
+      const found = availableProducts.find(p => p._id === idToFind);
+      if (found) {
+        fullProduct = { ...fullProduct, ...found };
+      }
+    }
+
+    // 3. Guarantee return structure, resolving any fallbacks
+    return {
+      title: fullProduct.title || item?.title || 'Unknown Product',
+      category: fullProduct.category || item?.category,
+      material: fullProduct.material || fullProduct.metal || item?.material || item?.metal,
+      weight: fullProduct.weight || item?.weight,
+      img: fullProduct.images?.[0] || fullProduct.image || fullProduct.img || item?.img || item?.image
+    };
+  };
+
   const toggleProductInOrder = (product) => {
     const existingIndex = newOrder?.products?.findIndex(p => p?.productId === product?._id);
     if (existingIndex >= 0) removeLineItem(existingIndex);
@@ -199,7 +225,7 @@ const OrderManagement = () => {
           productId: product?._id,
           title: product?.title,
           description: product?.description, 
-          price: product?.price || 0, // Set initial default price for this order
+          price: product?.price || 0,
           img: getProductImage(product),
           quantity: 1
         }]
@@ -225,7 +251,6 @@ const OrderManagement = () => {
       ...prev,
       products: prev.products.map(p => {
         if (p?.productId === productId) {
-          // Allow override of price ONLY for this current order payload
           return { ...p, price: newPrice >= 0 ? newPrice : 0 };
         }
         return p;
@@ -254,7 +279,7 @@ const OrderManagement = () => {
       products: newOrder?.products?.map(p => ({
         productId: p?.productId,
         quantity: p?.quantity,
-        price: p?.price // Use the custom adjusted price
+        price: p?.price
       })),
       totalAmount: totalAmount,
       status: 'Pending'
@@ -626,6 +651,8 @@ const OrderManagement = () => {
                               <ShoppingBag size={16} className="text-blue-600" /> Products Purchased
                             </h4>
                             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                              
+                              {/* Desktop Products Details Table */}
                               <div className="hidden sm:block overflow-x-auto">
                                 <table className="w-full text-sm">
                                   <thead className="bg-gray-50 border-b border-gray-200">
@@ -637,21 +664,53 @@ const OrderManagement = () => {
                                     </tr>
                                   </thead>
                                   <tbody className="divide-y divide-gray-100">
-                                    {order?.products?.map((item, idx) => (
-                                      <tr key={idx} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3">
-                                          <div className="font-medium text-gray-900 line-clamp-2">
-                                            {item?.productId?.title || item?.title || 'Unknown Product'}
-                                          </div>
-                                          {item?.category && <div className="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">{item.category}</div>}
-                                        </td>
-                                        <td className="px-4 py-3 text-center font-medium text-gray-700">{item?.quantity}</td>
-                                        <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(item?.price)}</td>
-                                        <td className="px-4 py-3 text-right font-bold text-gray-900">
-                                          {formatCurrency((item?.price || 0) * (item?.quantity || 1))}
-                                        </td>
-                                      </tr>
-                                    ))}
+                                    {order?.products?.map((item, idx) => {
+                                      // Get fully populated data, resolving fallbacks
+                                      const popProduct = getPopulatedProduct(item);
+                                      const category = popProduct.category || 'N/A';
+                                      const material = popProduct.material || 'N/A';
+                                      const weight = popProduct.weight ? `${popProduct.weight}g` : 'N/A';
+
+                                      return (
+                                        <tr key={idx} className="hover:bg-gray-50">
+                                          <td className="px-4 py-3">
+                                            <div className="flex items-start gap-3">
+                                              
+                                              <div className="w-12 h-12 rounded bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                {popProduct.img ? (
+                                                  <img src={popProduct.img} alt="product" className="w-full h-full object-cover" />
+                                                ) : (
+                                                  <ImageIcon size={16} className="text-gray-300" />
+                                                )}
+                                              </div>
+                                              
+                                              <div className="min-w-0">
+                                                <div className="font-medium text-gray-900 line-clamp-1" title={popProduct.title}>
+                                                  {popProduct.title}
+                                                </div>
+                                                {/* STRICT RENDER: Badges will always show even if data is missing */}
+                                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                                  <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider border border-gray-200">
+                                                    Cat: {category}
+                                                  </span>
+                                                  <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium border border-amber-100">
+                                                    Mat: {material}
+                                                  </span>
+                                                  <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-medium border border-blue-100">
+                                                    Wt: {weight}
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </td>
+                                          <td className="px-4 py-3 text-center font-medium text-gray-700">{item?.quantity}</td>
+                                          <td className="px-4 py-3 text-right text-gray-600">{formatCurrency(item?.price)}</td>
+                                          <td className="px-4 py-3 text-right font-bold text-gray-900">
+                                            {formatCurrency((item?.price || 0) * (item?.quantity || 1))}
+                                          </td>
+                                        </tr>
+                                      );
+                                    })}
                                   </tbody>
                                   <tfoot className="bg-gray-50 border-t border-gray-200">
                                     <tr>
@@ -662,16 +721,42 @@ const OrderManagement = () => {
                                 </table>
                               </div>
                               
+                              {/* Mobile Products Details List */}
                               <div className="sm:hidden divide-y divide-gray-100">
-                                {order?.products?.map((item, idx) => (
-                                  <div key={idx} className="p-3">
-                                    <div className="font-medium text-gray-900 text-sm mb-2">{item?.productId?.title || item?.title || 'Product'}</div>
-                                    <div className="flex justify-between items-center text-xs text-gray-600">
-                                      <span>{item?.quantity} × {formatCurrency(item?.price)}</span>
-                                      <span className="font-bold text-gray-900 text-sm">{formatCurrency((item?.price || 0) * (item?.quantity || 1))}</span>
+                                {order?.products?.map((item, idx) => {
+                                  const popProduct = getPopulatedProduct(item);
+                                  const category = popProduct.category || 'N/A';
+                                  const material = popProduct.material || 'N/A';
+                                  const weight = popProduct.weight ? `${popProduct.weight}g` : 'N/A';
+
+                                  return (
+                                    <div key={idx} className="p-3">
+                                      <div className="flex gap-3 mb-2">
+                                        
+                                        <div className="w-12 h-12 rounded bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                          {popProduct.img ? (
+                                            <img src={popProduct.img} alt="product" className="w-full h-full object-cover" />
+                                          ) : (
+                                            <ImageIcon size={16} className="text-gray-300" />
+                                          )}
+                                        </div>
+                                        
+                                        <div className="min-w-0 flex-1">
+                                          <div className="font-medium text-gray-900 text-sm mb-1 line-clamp-1">{popProduct.title}</div>
+                                          <div className="flex flex-wrap gap-1">
+                                            <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium uppercase border border-gray-200">Cat: {category}</span>
+                                            <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium border border-amber-100">Mat: {material}</span>
+                                            <span className="text-[10px] bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded font-medium border border-blue-100">Wt: {weight}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      <div className="flex justify-between items-center text-xs text-gray-600">
+                                        <span>{item?.quantity} × {formatCurrency(item?.price)}</span>
+                                        <span className="font-bold text-gray-900 text-sm">{formatCurrency((item?.price || 0) * (item?.quantity || 1))}</span>
+                                      </div>
                                     </div>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                                 <div className="p-3 bg-gray-50 flex justify-between items-center border-t border-gray-200">
                                   <span className="font-semibold text-gray-600 text-sm">Total:</span>
                                   <span className="font-bold text-blue-700">{formatCurrency(order?.totalAmount)}</span>
@@ -786,8 +871,8 @@ const OrderManagement = () => {
                             <h4 className="font-bold text-gray-900 text-sm line-clamp-1" title={product?.title}>{product?.title}</h4>
                             
                             <div className="flex flex-wrap gap-1 mt-1.5">
-                              {product?.category && <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium">{product.category}</span>}
-                              {product?.metal && <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium border border-amber-100">{product.metal}</span>}
+                              {product?.category && <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-medium">Cat: {product.category}</span>}
+                              {(product?.material || product?.metal) && <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium border border-amber-100">Mat: {product.material || product.metal}</span>}
                             </div>
 
                             <div className="mt-2 mb-3 flex items-center justify-between">
@@ -876,12 +961,12 @@ const OrderManagement = () => {
                                 
                                 {/* Detailed Badges */}
                                 <div className="flex flex-wrap gap-1.5 mt-2">
-                                  {p?.category && <span className="text-[10px] font-medium bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded">Category: {p.category}</span>}
-                                  {p?.metal && <span className="text-[10px] font-medium bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-100">Metal: {p.metal}</span>}
+                                  {p?.category && <span className="text-[10px] font-medium bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded border border-gray-200">Cat: {p.category}</span>}
+                                  {(p?.material || p?.metal) && <span className="text-[10px] font-medium bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded border border-amber-100">Mat: {p.material || p.metal}</span>}
                                   {p?.gemstone && <span className="text-[10px] font-medium bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded border border-purple-100">Stone: {p.gemstone}</span>}
                                   {p?.purity && <span className="text-[10px] font-medium bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded border border-blue-100">Purity: {p.purity}</span>}
-                                  {p?.weight && <span className="text-[10px] font-medium bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded">Weight: {p.weight}</span>}
-                                  {p?.size && <span className="text-[10px] font-medium bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded">Size: {p.size}</span>}
+                                  {p?.weight && <span className="text-[10px] font-medium bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded border border-emerald-100">Wt: {p.weight}g</span>}
+                                  {p?.size && <span className="text-[10px] font-medium bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded border border-gray-200">Size: {p.size}</span>}
                                 </div>
                               </div>
                             </div>
