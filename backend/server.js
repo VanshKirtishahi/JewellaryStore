@@ -12,6 +12,7 @@ const allowedOrigins = [
   'https://shrivenkateshwaraenterprises.in',
   'https://jewellary-store-liard.vercel.app',
   'https://jewellarystore.onrender.com',
+  'https://jewellary-store-rouge.vercel.app',
   'https://admin.shrivenkateshwaraenterprises.in', // Added HTTPS version without trailing slash
   'http://admin.shrivenkateshwaraenterprises.in',
   'http://localhost:5173',
