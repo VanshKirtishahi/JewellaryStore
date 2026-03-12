@@ -6,9 +6,8 @@ console.log('API Base URL:', BASE_URL); // Debug log
 
 const instance = axios.create({
   baseURL: BASE_URL,
-  // Changed to false to prevent strict CORS preflight issues with standard token auth
-  withCredentials: false, 
-  timeout: 10000,
+  withCredentials: true,
+  timeout: 60000, // Increase to 60 seconds for cold starts
 });
 
 // Request interceptor
