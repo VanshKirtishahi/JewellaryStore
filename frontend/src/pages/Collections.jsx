@@ -27,8 +27,8 @@ const Collections = () => {
       try {
         setLoading(true);
         const res = await axios.get('/products');
-        setProducts(res.data);
-        setFilteredProducts(res.data);
+        setProducts(res?.data || []);
+        setFilteredProducts(res?.data || []);
       } catch (err) {
         console.error('Error fetching products:', err);
       } finally {
@@ -40,38 +40,38 @@ const Collections = () => {
 
   // Filter Logic
   useEffect(() => {
-    let result = [...products];
+    let result = [...(products || [])];
 
     // 1. Search
     if (searchQuery) {
       result = result.filter(p =>
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase())
+        p?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+        p?.category?.toLowerCase()?.includes(searchQuery?.toLowerCase())
       );
     }
 
     // 2. Category
     if (activeCategory !== 'All') {
-      result = result.filter(p => p.category === activeCategory);
+      result = result.filter(p => p?.category === activeCategory);
     }
 
     // 3. Price
     if (priceRange === 'under-500') {
-      result = result.filter(p => p.price < 500);
+      result = result.filter(p => (p?.price || 0) < 500);
     } else if (priceRange === '500-1000') {
-      result = result.filter(p => p.price >= 500 && p.price <= 1000);
+      result = result.filter(p => (p?.price || 0) >= 500 && (p?.price || 0) <= 1000);
     } else if (priceRange === '1000-plus') {
-      result = result.filter(p => p.price > 1000);
+      result = result.filter(p => (p?.price || 0) > 1000);
     }
 
     // 4. Sorting
     if (sortBy === 'price-low') {
-      result.sort((a, b) => a.price - b.price);
+      result.sort((a, b) => (a?.price || 0) - (b?.price || 0));
     } else if (sortBy === 'price-high') {
-      result.sort((a, b) => b.price - a.price);
+      result.sort((a, b) => (b?.price || 0) - (a?.price || 0));
     } else {
       // Newest
-      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      result.sort((a, b) => new Date(b?.createdAt) - new Date(a?.createdAt));
     }
 
     setFilteredProducts(result);
@@ -82,7 +82,7 @@ const Collections = () => {
       style: 'currency',
       currency: 'INR',
       maximumFractionDigits: 0
-    }).format(amount);
+    }).format(amount || 0);
   };
 
   if (loading) {
@@ -170,7 +170,7 @@ const Collections = () => {
         </div>
 
         {/* Product Grid */}
-        {filteredProducts.length === 0 ? (
+        {filteredProducts?.length === 0 ? (
           <div className="text-center py-20">
             <Gem className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900">No items found</h3>
@@ -184,20 +184,20 @@ const Collections = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <div key={product._id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
+            {filteredProducts?.map((product) => (
+              <div key={product?._id} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300">
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden bg-gray-100">
                   <img
-                    src={product.images?.[0] || 'https://via.placeholder.com/400'}
-                    alt={product.title}
+                    src={product?.images?.[0] || 'https://via.placeholder.com/400'}
+                    alt={product?.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
 
                   {/* Overlay Actions */}
                   <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                     <Link
-                      to={`/product/${product._id}`}
+                      to={`/product/${product?._id}`}
                       className="p-3 bg-white text-gray-900 rounded-full hover:bg-jewel-gold hover:text-white transition-colors transform hover:scale-110"
                       title="View Details"
                     >
@@ -212,7 +212,7 @@ const Collections = () => {
                   </div>
 
                   {/* Badges */}
-                  {product.stock < 5 && product.stock > 0 && (
+                  {product?.stock < 5 && product?.stock > 0 && (
                     <span className="absolute bottom-3 left-3 px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">
                       Low Stock
                     </span>
@@ -221,14 +221,15 @@ const Collections = () => {
 
                 {/* Info */}
                 <div className="p-5">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{product.category}</p>
-                  <h3 className="font-bold text-gray-900 mb-2 truncate">{product.title}</h3>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">{product?.category}</p>
+                  <h3 className="font-bold text-gray-900 mb-2 truncate">{product?.title}</h3>
                   <div className="flex items-center justify-between">
+                    {/* Updated to display Weight instead of Amount */}
                     <span className="text-lg font-serif font-bold text-jewel-gold">
-                      {formatCurrency(product.price)}
+                      {product?.weight ? `${product.weight}g` : 'N/A'}
                     </span>
                     <Link
-                      to={`/product/${product._id}`}
+                      to={`/product/${product?._id}`}
                       className="text-sm font-medium text-gray-600 hover:text-jewel-gold transition-colors"
                     >
                       View →

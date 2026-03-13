@@ -141,10 +141,9 @@ const Home = () => {
       try {
         setLoading(true);
         const res = await axios.get('/products');
-        setProducts(res.data);
+        setProducts(res?.data || []);
       } catch (err) {
         console.error("Error fetching products:", err);
-        // Fallback to empty array so the page still renders
         setProducts([]);
       } finally {
         setLoading(false);
@@ -160,25 +159,24 @@ const Home = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products?.filter(product => {
     const matchesSearch = searchQuery === '' ||
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      product?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+      product?.category?.toLowerCase()?.includes(searchQuery?.toLowerCase()) ||
+      product?.description?.toLowerCase()?.includes(searchQuery?.toLowerCase());
 
     const matchesCategory = activeCategory === 'all' ||
-      product.category.toLowerCase() === activeCategory.toLowerCase();
+      product?.category?.toLowerCase() === activeCategory?.toLowerCase();
 
     return matchesSearch && matchesCategory;
   });
 
   const handleSearch = (e) => {
     e.preventDefault();
-    // Search logic already handled by filteredProducts
   };
 
   const scrollToCollection = () => {
-    document.getElementById('collection').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const renderStars = (rating) => {
@@ -333,7 +331,7 @@ const Home = () => {
                 Our Exquisite Collection
               </h2>
               <p className="text-gray-600">
-                {filteredProducts.length} stunning piece{filteredProducts.length !== 1 ? 's' : ''} found
+                {filteredProducts?.length || 0} stunning piece{filteredProducts?.length !== 1 ? 's' : ''} found
               </p>
             </div>
 
@@ -361,7 +359,7 @@ const Home = () => {
               <div className="w-12 h-12 border-4 border-jewel-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-gray-600">Loading exquisite pieces...</p>
             </div>
-          ) : filteredProducts.length === 0 ? (
+          ) : filteredProducts?.length === 0 ? (
             <div className="text-center py-12">
               <Gem className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-medium text-gray-900 mb-2">No pieces found</h3>
@@ -378,14 +376,14 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
-              {filteredProducts.map((product) => (
-                <div key={product._id} className="group">
+              {filteredProducts?.map((product) => (
+                <div key={product?._id} className="group">
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-500 h-full flex flex-col">
                     {/* Product Image */}
                     <div className="relative aspect-square overflow-hidden">
                       <img
-                        src={product.images?.[0] || 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
-                        alt={product.title}
+                        src={product?.images?.[0] || 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'}
+                        alt={product?.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         loading="lazy"
                       />
@@ -401,10 +399,10 @@ const Home = () => {
                       </div>
 
                       {/* Discount Badge */}
-                      {product.discount > 0 && (
+                      {product?.discount > 0 && (
                         <div className="absolute top-3 left-3">
                           <span className="px-3 py-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg">
-                            -{product.discount}%
+                            -{product?.discount}%
                           </span>
                         </div>
                       )}
@@ -415,38 +413,32 @@ const Home = () => {
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-xs text-gray-500 uppercase tracking-widest">
-                            {product.category}
+                            {product?.category}
                           </span>
-                          {product.stock < 5 && product.stock > 0 && (
+                          {product?.stock < 5 && product?.stock > 0 && (
                             <span className="text-xs px-2 py-1 bg-amber-100 text-amber-800 rounded-full">
                               Low Stock
                             </span>
                           )}
                         </div>
                         <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-2 line-clamp-2">
-                          {product.title}
+                          {product?.title}
                         </h3>
                         <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                          {product.description?.substring(0, 100)}...
+                          {product?.description?.substring(0, 100)}...
                         </p>
                       </div>
 
                       <div className="pt-4 border-t border-gray-200">
                         <div className="flex items-center justify-between">
                           <div>
+                            {/* Updated to display Weight instead of Amount */}
                             <span className="text-xl sm:text-2xl font-bold text-gray-900">
-                              ₹{product.price.toLocaleString('en-IN')}
+                              {product?.weight ? `${product.weight}g` : 'N/A'}
                             </span>
-                            {product.discount > 0 && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm text-red-500 line-through">
-                                  ₹{(product.price / (1 - product.discount / 100)).toLocaleString('en-IN')}
-                                </span>
-                              </div>
-                            )}
                           </div>
                           <Link
-                            to={`/product/${product._id}`}
+                            to={`/product/${product?._id}`}
                             className="px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gradient-to-r hover:from-jewel-gold hover:to-amber-500 hover:text-white transition-all duration-300 text-sm font-medium flex items-center gap-1 group"
                           >
                             Details
